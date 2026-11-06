@@ -1,0 +1,1358 @@
+<!doctype html>
+<html lang="en" data-theme="sunset" data-soundcheck="pending">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Rishav Kumar — CSE Undergrad at IIIT Bhubaneswar, C99/C++ Systems Builder, Drummer, and Distance Runner."
+    />
+    <title>Rishav Kumar // Systems, Rhythm &amp; Miles</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href="https://rishav-netizen.github.io/" />
+    <meta name="theme-color" content="#020307" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://rishav-netizen.github.io/" />
+    <meta property="og:title" content="Rishav Kumar // Systems, Rhythm &amp; Miles" />
+    <meta
+      property="og:description"
+      content="Rishav Kumar — CSE Undergrad at IIIT Bhubaneswar, C99/C++ Systems Builder, Drummer, and Distance Runner."
+    />
+    <meta property="og:image" content="https://rishav-netizen.github.io/drumming-session.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Rishav Kumar // Systems, Rhythm &amp; Miles" />
+    <meta
+      name="twitter:description"
+      content="Rishav Kumar — CSE Undergrad at IIIT Bhubaneswar, C99/C++ Systems Builder, Drummer, and Distance Runner."
+    />
+    <meta name="twitter:image" content="https://rishav-netizen.github.io/drumming-session.jpg" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Rishav Kumar",
+        "alternateName": "rishav-netizen",
+        "url": "https://rishav-netizen.github.io/",
+        "email": "mailto:rishavkumar2k07@gmail.com",
+        "affiliation": {
+          "@type": "CollegeOrUniversity",
+          "name": "IIIT Bhubaneswar"
+        },
+        "sameAs": [
+          "https://github.com/rishav-netizen",
+          "https://leetcode.com/u/rishav_leet/",
+          "https://github.com/rishav-netizen/Project-Euler"
+        ]
+      }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Montserrat:wght@800;900&family=Space+Grotesk:wght@400;500;600;700&family=Syne:ital,wght@0,600;0,700;0,800;1,600&display=swap"
+      rel="stylesheet"
+    />
+    <script>
+      try {
+        if (sessionStorage.getItem('cadence-soundcheck-v1') === 'complete') {
+          document.documentElement.dataset.soundcheck = 'skip';
+        }
+      } catch {}
+    </script>
+  </head>
+  <body>
+    <!-- Cinematic Name-Reveal Preloader -->
+    <div id="soundcheck-preloader" class="soundcheck-preloader" aria-label="Stage calibration" role="status">
+      <!-- Split baffles that slide apart at the end -->
+      <div class="soundcheck-baffle soundcheck-baffle--left" aria-hidden="true"></div>
+      <div class="soundcheck-baffle soundcheck-baffle--right" aria-hidden="true"></div>
+
+      <!-- Corner HUD telemetry (top-left) -->
+      <div class="sc-hud-corner sc-hud-corner--tl astro-console-type" aria-hidden="true">
+        <span class="sc-hud-dot"></span>
+        <span id="soundcheck-status">&gt; BOOT SEQUENCE INIT</span>
+      </div>
+
+      <!-- Corner telemetry (top-right) -->
+      <div class="sc-hud-corner sc-hud-corner--tr astro-console-type" aria-hidden="true">
+        <span>STAGE // 001</span>
+        <span>BHUBANESWAR, IN</span>
+      </div>
+
+      <!-- Diagnostic lines (bottom-left) -->
+      <div class="sc-hud-corner sc-hud-corner--bl astro-console-type" aria-hidden="true">
+        <p id="soundcheck-line-1" class="sc-diag-line">&gt; ATmega328P SERIAL BUS <b class="sc-ok">[...]</b></p>
+        <p id="soundcheck-line-2" class="sc-diag-line">&gt; TRANSIENT SENSITIVITY: 176 SPM <b class="sc-ok">[...]</b></p>
+        <p id="soundcheck-line-3" class="sc-diag-line">&gt; MASTER CLOCK: 128 BPM <b class="sc-ok">[...]</b></p>
+        <p id="soundcheck-line-4" class="sc-diag-line">&gt; 7/8 POLYRHYTHM <b class="sc-ok">[...]</b></p>
+      </div>
+
+      <!-- Progress bar (bottom-right) -->
+      <div class="sc-hud-corner sc-hud-corner--br astro-console-type" aria-hidden="true">
+        <div class="sc-progress-label">
+          <span>NODE SYNC</span>
+          <span><span id="soundcheck-progress">00</span>%</span>
+        </div>
+        <div class="soundcheck-meter"><span id="soundcheck-meter-fill"></span></div>
+      </div>
+
+      <!-- THE CENTREPIECE: full-screen scrambled name reveal -->
+      <div class="sc-name-stage" aria-label="Rishav Kumar">
+        <div class="sc-name-row" id="sc-name-first" aria-hidden="true">
+          <!-- Characters injected by JS -->
+        </div>
+        <div class="sc-name-separator" aria-hidden="true"></div>
+        <div class="sc-name-row" id="sc-name-last" aria-hidden="true">
+          <!-- Characters injected by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Custom Magnetic Cursor Halo with Context Telemetry Label -->
+    <div id="cursor-halo" class="cursor-halo" aria-hidden="true">
+      <span id="cursor-halo-label" class="cursor-halo__label"></span>
+    </div>
+
+    <!-- Full-Viewport Interactive Glyph Matrix with Radial Hover Spotlight -->
+    <canvas id="bg-canvas" aria-hidden="true"></canvas>
+
+    <!-- Single Minimal Floating HUD Dock Pill (Summons Terminal Drawer via ⌘K) -->
+    <div class="floating-dock" role="region" aria-label="Quick command shell">
+      <button
+        type="button"
+        id="floating-terminal-btn"
+        class="floating-terminal-pill"
+        aria-controls="terminal-section"
+        aria-expanded="false"
+      >
+        <span class="floating-terminal-pill__dot"></span>
+        <span class="floating-terminal-pill__prompt">&gt;_</span>
+        <span>TERMINAL</span>
+        <kbd>⌘K</kbd>
+      </button>
+    </div>
+
+    <!-- Ground-Level Road Runner Progress Dock (Below) -->
+    <div id="runner-hud-strip" class="runner-hud-strip" role="region" aria-label="Scroll progress road track">
+      <canvas
+        id="runner-track-canvas"
+        class="runner-track-canvas"
+        width="1240"
+        height="86"
+        aria-label="Rishav running and grooving along the road track with musical footstep trails"
+      ></canvas>
+    </div>
+
+    <!-- Whisper-Quiet Hero Scroll Cue at Scroll = 0 -->
+    <div id="hero-scroll-cue" class="hero-scroll-cue" aria-hidden="true">
+      <span class="scroll-cue-line"></span>
+    </div>
+
+    <!-- Whisper-Quiet Minimal Top HUD Bar -->
+    <header class="top-bar-wrap">
+      <nav class="navbar" aria-label="Primary navigation">
+        <a href="#overview" class="brand" data-scroll-to="overview">
+          <span class="brand-mark">Ω</span> rishav<span>.netizen</span>
+        </a>
+        <ul class="nav-links" id="primary-links">
+          <li><a href="#about" data-scroll-to="about">IDENTITY</a></li>
+          <li><a href="#projects" data-scroll-to="projects">PROJECTS</a></li>
+          <li><a href="#sequencer-section" data-scroll-to="sequencer-section">SYNTH</a></li>
+          <li><a href="#experience" data-scroll-to="experience">JOURNEY</a></li>
+          <li><a href="#leetcode" data-scroll-to="leetcode">LEETCODE</a></li>
+          <li><a href="#github" data-scroll-to="github">GITHUB</a></li>
+          <li><a href="#euler" data-scroll-to="euler">EULER</a></li>
+          <li><a href="#contact" data-scroll-to="contact">CONTACT</a></li>
+          <li class="mobile-nav-status-row">
+            <button class="mobile-nav-status-btn" id="mobile-game-btn" type="button">🎮 GAME MODE</button>
+            <button class="mobile-nav-status-btn" id="mobile-sound-btn" type="button">SOUND: ON</button>
+            <button class="mobile-nav-status-btn" id="mobile-motion-btn" type="button">MOTION: ON</button>
+          </li>
+        </ul>
+        <div class="nav-actions">
+          <button class="icon-btn status-btn game-mode-trigger-btn" id="game-mode-btn" type="button" title="Launch Arcade Game Mode" aria-label="Launch Arcade Game Mode" aria-expanded="false">🎮 GAME</button>
+          <button class="icon-btn" id="groove-btn" type="button" title="Toggle 128 BPM groove" aria-label="Toggle 128 BPM groove">♫</button>
+          <button class="icon-btn status-btn" id="sound-btn" type="button" title="Toggle sound" aria-label="Toggle sound" aria-pressed="true">SND</button>
+          <button class="icon-btn status-btn" id="motion-btn" type="button" title="Toggle motion" aria-label="Toggle motion" aria-pressed="true">MOT</button>
+          <button class="icon-btn" id="theme-btn" type="button" title="Switch theme" aria-label="Switch theme">◐</button>
+          <button class="icon-btn mobile-menu-btn" id="mobile-menu-btn" type="button" title="Open navigation" aria-label="Open navigation">☰</button>
+          <div class="theme-dropdown" id="theme-menu" role="menu" aria-label="Theme selector">
+            <button class="theme-option active" data-set-theme="sunset" type="button">✦ Abyssal Cosmos <span class="check">✓</span></button>
+            <button class="theme-option" data-set-theme="dark" type="button">● Nebula Cyan <span class="check"></span></button>
+            <button class="theme-option" data-set-theme="ocean" type="button">∿ Electric Teal <span class="check"></span></button>
+            <button class="theme-option" data-set-theme="midnight" type="button">✧ Deep Aubergine <span class="check"></span></button>
+            <button class="theme-option" data-set-theme="deep-dark" type="button">◒ Marigold Amber <span class="check"></span></button>
+            <button class="theme-option" data-set-theme="rainforest" type="button">⌁ Emerald Aurora <span class="check"></span></button>
+            <button class="theme-option" data-set-theme="blue-gray" type="button">◌ Platinum Silver <span class="check"></span></button>
+            <button class="theme-option" data-set-theme="light" type="button">☀ Warm Ivory <span class="check"></span></button>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <div class="container">
+      <main id="overview">
+        <!-- ======================================================================
+             FULLSCREEN 3D VOLUMETRIC POINT-CLOUD & HOLOGRAM HERO STAGE
+             ====================================================================== -->
+        <section
+          id="hero-scroll-track"
+          class="hero-scroll-track scene-3d"
+          data-morph-stop
+          aria-labelledby="hero-name"
+        >
+          <div id="hero-stage" class="hero-sticky-stage">
+            <div class="hero-3d-arena">
+              <div class="hero-monumental-backdrop" id="hero-monumental-text" data-parallax-depth="-0.25">
+                <div class="hero-name-stage-wrap">
+                  <div id="hero-reveal-scanline" class="hero-reveal-scanline" aria-hidden="true"></div>
+                  <h1 id="hero-name" class="hero-monumental-name" aria-label="Rishav Kumar">
+                    <span class="hero-line hero-line--first">
+                      <span class="hero-word hero-word--first">RISHAV</span>
+                    </span>
+                    <span class="hero-line hero-line--second">
+                      <span class="hero-word hero-word--second">KUMAR</span>
+                    </span>
+                  </h1>
+                </div>
+              </div>
+
+              <div class="hero-kit-canvas-wrap">
+                <canvas
+                  id="hero-kit-canvas"
+                  width="1040"
+                  height="560"
+                  aria-label="Interactive 2,200-particle 3D volumetric sculpture"
+                ></canvas>
+              </div>
+            </div>
+
+            <div class="hero-minimal-footer" data-parallax-depth="0.1">
+              <div class="cta-row cta-row--centerpiece" role="group" aria-label="Interactive hero stage controls">
+                <button
+                  id="hero-morph-btn"
+                  class="btn-secondary cta-side-btn"
+                  type="button"
+                  title="Cycle 3D particle sculpture"
+                >
+                  ◈ STAGE ↻
+                </button>
+                <button
+                  id="hero-connect-btn"
+                  class="btn-primary hero-groove-center-btn"
+                  type="button"
+                  aria-pressed="false"
+                >
+                  <span id="hero-groove-label">🥁 GROOVE</span>
+                </button>
+                <button
+                  id="warp-trigger"
+                  class="btn-secondary warp-trigger cta-side-btn"
+                  type="button"
+                  aria-describedby="warp-hint"
+                >
+                  🎮 ARCADE <span class="sr-only">⚡ WARP / TAKEOFF</span>
+                </button>
+              </div>
+              <span id="warp-hint" class="sr-only">Launch arcade</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================================
+             SECTION 01: IDENTITY, PERSONAL STORY & INTERACTIVE PORTRAIT (TOP SECTION)
+             ====================================================================== -->
+        <section id="about" class="section-block fullpage-section scene-3d" data-morph-stop aria-labelledby="about-title">
+          <header class="section-header" data-parallax-depth="0.08">
+            <div>
+              <p class="section-comment">
+                01 // IDENTITY
+                <span class="sr-only">SECTION 01 // BIOMETRIC &amp; CADENCE DOSSIER</span>
+              </p>
+              <h2 id="about-title">Behind the <em>Code &amp; Kit</em></h2>
+            </div>
+            <span class="section-counter">01 / 07</span>
+          </header>
+
+          <div class="about-interactive-split">
+            <div class="hardware-deck dossier-deck about-dossier-column">
+              <article class="hw-card hw-card--full" data-card-tone="cyan" data-scroll-3d="left">
+                <header class="hw-card__header">
+                  <span class="hw-tag">RISHAV KUMAR</span>
+                  <span class="hw-status">● IIIT BHUBANESWAR</span>
+                </header>
+                <div class="hw-card__body">
+                  <p class="age-readout"><span id="age-counter">19.465000000</span> yrs</p>
+                  <p class="hw-desc">
+                    CSE undergrad from Shimla building pure C99/C++ systems, Arduino hardware bridges, and AR.
+                  </p>
+                </div>
+                <dl class="hw-metrics">
+                  <div>
+                    <dt>BEATS HIT</dt>
+                    <dd id="beats-counter">0</dd>
+                  </div>
+                  <div>
+                    <dt>BASE</dt>
+                    <dd>Shimla → Bhubaneswar</dd>
+                  </div>
+                </dl>
+              </article>
+
+              <article class="hw-card hw-card--half" data-card-tone="violet" data-scroll-3d="up">
+                <header class="hw-card__header">
+                  <span class="hw-tag">RUNNING</span>
+                  <span class="hw-status">5K &amp; 10K</span>
+                </header>
+                <div class="hw-card__body">
+                  <h3>Road Miles</h3>
+                  <canvas
+                    id="runner-elevation-canvas"
+                    class="runner-elevation-canvas"
+                    width="440"
+                    height="96"
+                    aria-label="Elevation and pace trace"
+                  ></canvas>
+                </div>
+                <dl class="hw-metrics">
+                  <div>
+                    <dt>5K PR</dt>
+                    <dd>27:58</dd>
+                  </div>
+                  <div>
+                    <dt>10K PR</dt>
+                    <dd>1:02:00</dd>
+                  </div>
+                </dl>
+              </article>
+
+              <article class="hw-card hw-card--half" data-card-tone="cyan" data-scroll-3d="right">
+                <header class="hw-card__header">
+                  <span class="hw-tag">DRUMS</span>
+                  <span class="hw-status">SELF-TAUGHT</span>
+                </header>
+                <div class="hw-card__body">
+                  <h3>By Ear &amp; Feel</h3>
+                  <p class="hw-desc">
+                    6th-grade tabla to Tama jam pads—learned purely by ear.
+                  </p>
+                </div>
+                <dl class="hw-metrics">
+                  <div>
+                    <dt>SETUP</dt>
+                    <dd>Tama · ProMark</dd>
+                  </div>
+                  <div>
+                    <dt>ROOTS</dt>
+                    <dd>Tabla → Kit</dd>
+                  </div>
+                </dl>
+              </article>
+
+              <article class="hw-card hw-card--full" data-card-tone="white" data-scroll-3d="up">
+                <header class="hw-card__header">
+                  <span class="hw-tag">ROTATION</span>
+                  <span class="hw-status">● NOW</span>
+                </header>
+                <div class="hw-card__body">
+                  <div class="runtime-telemetry-box">
+                    <div class="telemetry-line">
+                      <span class="tl-label">STACK:</span>
+                      <span class="tl-val">C99/C++, AR, Robotics, AI/ML &amp; DSA</span>
+                    </div>
+                    <div class="telemetry-line">
+                      <span class="tl-label">JAMS:</span>
+                      <span class="tl-val">Polyphia, Plini, MJ, Bon Jovi, The Local Train</span>
+                    </div>
+                    <div class="telemetry-line">
+                      <span class="tl-label">SHELL:</span>
+                      <span class="tl-val tl-val--chips">
+                        <button type="button" class="term-deep-link" data-open-cmd="whoami">&gt;_ whoami</button>
+                        <button type="button" class="term-deep-link" data-open-cmd="playlist">&gt;_ playlist</button>
+                        <button type="button" class="term-deep-link" data-open-cmd="drums">&gt;_ drums</button>
+                        <button type="button" class="term-deep-link" data-open-cmd="running">&gt;_ running</button>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            </div>
+
+            <!-- Interactive 4-Mode ASCII Portrait + Raw Photo Toggle -->
+            <figure class="ascii-wrap" data-parallax-depth="0.14">
+              <div class="portrait-3d-stage">
+                <div class="ascii-frame hw-card" data-card-tone="cyan">
+                  <div class="gallery-frame-header">
+                    <span>INTERACTIVE SELF-PORTRAIT</span>
+                    <span id="ascii-mode-readout">MODE: CONSTELLATION</span>
+                  </div>
+
+                  <canvas
+                    id="ascii-canvas"
+                    width="480"
+                    height="480"
+                    role="img"
+                    aria-label="Interactive portrait of Rishav"
+                  ></canvas>
+
+                  <div class="ascii-mode-bar" role="group" aria-label="Interactive ASCII physics brushes">
+                    <button type="button" class="ascii-mode-btn" data-ascii-mode="spring">
+                      Spring
+                    </button>
+                    <button type="button" class="ascii-mode-btn" data-ascii-mode="vortex">
+                      Vortex
+                    </button>
+                    <button type="button" class="ascii-mode-btn" data-ascii-mode="strike">
+                      Impulse
+                    </button>
+                    <button type="button" class="ascii-mode-btn is-active" data-ascii-mode="star">
+                      Constellation
+                    </button>
+                  </div>
+
+                  <div class="gallery-frame-footer">
+                    <div class="ascii-action-row">
+                      <button id="portrait-photo-toggle" class="micro-pad" type="button">
+                        📷 Raw Photo
+                      </button>
+                      <button id="portrait-pulse" class="micro-pad portrait-pulse" type="button">
+                        ⚡ Ripple
+                      </button>
+                      <button class="micro-pad" id="player-play-btn" type="button" aria-label="Toggle groove">
+                        ▶
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </figure>
+          </div>
+        </section>
+
+        <!-- ======================================================================
+             SECTION 02: SELECTED WORKS — 5 INTERACTIVE LIVE SIMULATIONS & STORIES
+             ====================================================================== -->
+        <section id="projects" class="section-block fullpage-section scene-3d" data-morph-stop tabindex="-1" aria-labelledby="projects-title">
+          <header class="section-header" data-parallax-depth="0.08">
+            <div>
+              <p class="section-comment">
+                02 // PROJECTS
+                <span class="sr-only">SECTION 02 // SELECTED WORKS &amp; DAW MULTITRACK SPLITS</span>
+              </p>
+              <h2 id="projects-title">Things I’ve <em>Built</em></h2>
+            </div>
+            <span class="section-counter">02 / 07</span>
+          </header>
+
+          <!-- Minimal 5-Node Constellation Index -->
+          <div class="constellation-map-stage" aria-label="Interactive 5-node project index">
+            <svg class="constellation-svg-lines" viewBox="0 0 1000 160" preserveAspectRatio="none" aria-hidden="true">
+              <polyline
+                points="100,95 300,48 500,105 700,48 900,95"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1"
+                stroke-dasharray="3 6"
+              />
+            </svg>
+            <div class="drum-kit-overhead-map" role="group" aria-label="Five project nodes">
+              <button
+                type="button"
+                class="kit-map-node is-selected"
+                data-kit-target="project-kick"
+                data-kit-sound="kick"
+              >
+                <span class="kit-node-num">01 · C99</span>
+                <strong>c-image-filters</strong>
+                <small>2D Convolution</small>
+              </button>
+
+              <button
+                type="button"
+                class="kit-map-node"
+                data-kit-target="project-snare"
+                data-kit-sound="rim"
+              >
+                <span class="kit-node-num">02 · C++17</span>
+                <strong>Doppler HIL</strong>
+                <small>Mach Wave Sim</small>
+              </button>
+
+              <button
+                type="button"
+                class="kit-map-node"
+                data-kit-target="project-hihat"
+                data-kit-sound="hat"
+              >
+                <span class="kit-node-num">03 · PYTHON</span>
+                <strong>Karen’s Ear</strong>
+                <small>AI 911 Dispatch</small>
+              </button>
+
+              <button
+                type="button"
+                class="kit-map-node"
+                data-kit-target="project-racktom"
+                data-kit-sound="rim"
+              >
+                <span class="kit-node-num">04 · POSIX</span>
+                <strong>cpp-arduino</strong>
+                <small>Raw Serial Bridge</small>
+              </button>
+
+              <button
+                type="button"
+                class="kit-map-node"
+                data-kit-target="project-floortom"
+                data-kit-sound="kick"
+              >
+                <span class="kit-node-num">05 · JS / 3D</span>
+                <strong>3D-Snail</strong>
+                <small>GSAP Spring Art</small>
+              </button>
+            </div>
+          </div>
+
+          <!-- Strictly 5 Project Cards with Live Canvas Previews & Personal Notes -->
+          <div class="hardware-deck drum-kit-deck">
+            <!-- 01: c-image-filters -->
+            <article
+              id="project-kick"
+              class="hw-card project-card drum-piece-pod hw-card--wide is-highlighted"
+              data-card-tone="cyan"
+              data-scroll-3d="left"
+            >
+              <div class="project-card__glow" aria-hidden="true"></div>
+              <div class="project-visual-stage project-visual-stage--filters">
+                <canvas class="project-preview-canvas" id="canvas-preview-c-image-filters" width="560" height="275" aria-label="Interactive C99 2D spatial convolution live kernel preview"></canvas>
+                <div class="filter-controls-hud">
+                  <div class="filter-select-group">
+                    <label for="c-filter-select" class="filter-label">KERNEL //</label>
+                    <select id="c-filter-select" class="c-filter-select" aria-label="Select C99 Image Filter Kernel">
+                      <option value="sobel" selected>Sobel 3×3 (Edge Detect)</option>
+                      <option value="gaussian">Gaussian 3×3 (Blur)</option>
+                      <option value="sharpen">Sharpen (Kernel [5])</option>
+                      <option value="laplacian">Laplacian (High-Pass)</option>
+                      <option value="emboss">Emboss (3D Relief)</option>
+                      <option value="sepia">Sepia (Warm Phosphor)</option>
+                      <option value="grayscale">Grayscale (Rec. 601)</option>
+                      <option value="invert">Invert (Film Negative)</option>
+                      <option value="threshold">Binary Threshold</option>
+                      <option value="edge_color">RGB Chromatic Edges</option>
+                      <option value="original">Raw RGB (Original)</option>
+                    </select>
+                  </div>
+                  <button id="c-filter-mode-btn" class="filter-mode-toggle" type="button" aria-label="Toggle Full or Split View" title="Toggle Split-Screen vs Full Image View">
+                    <span class="mode-tag">VIEW:</span> <span id="c-filter-mode-label" class="mode-val">SPLIT</span>
+                  </button>
+                </div>
+                <div class="project-visual-overlay">
+                  <span class="project-visual-overlay__dot"></span>
+                  <span id="c-filter-status-text">C99 2D KERNEL // HOVER TO SWEEP</span>
+                </div>
+                <span class="project-index-watermark">01</span>
+              </div>
+              <header class="hw-card__header">
+                <div class="hw-card__badges">
+                  <span class="hw-tag">01 // PURE C99</span>
+                  <span class="hw-status">● ZERO DEPS</span>
+                </div>
+                <a href="https://github.com/rishav-netizen/c-image-filters" target="_blank" rel="noreferrer" class="hw-link">GITHUB ↗</a>
+              </header>
+              <div class="hw-card__body">
+                <h3>c-image-filters</h3>
+                <p class="hw-desc">
+                  Zero-dependency C99 BMP parser and 2D spatial convolution engine.
+                </p>
+                <p class="telemetry-spec" hidden>// 24-BIT RGB · SOBEL KERNEL · ZERO DEPENDENCIES</p>
+                <svg class="waveform" viewBox="0 0 640 84" role="img" aria-label="Spatial convolution waveform">
+                  <path d="M0 46 L28 46 L38 20 L50 69 L64 42 L85 45 L104 45 L117 12 L132 73 L148 44 L178 44 L191 31 L204 60 L218 44 L255 44 L269 8 L286 78 L304 45 L338 45 L356 23 L369 67 L386 45 L418 45 L431 15 L448 74 L465 45 L520 45 L535 29 L549 61 L564 45 L640 45" />
+                </svg>
+                <div class="tag-row">
+                  <span>C99</span><span>2D Convolution</span><span>Sobel Edge</span><span>BMP Binary</span>
+                </div>
+              </div>
+              <div class="card-footer-actions">
+                <button type="button" class="term-deep-link term-deep-link--btn" data-open-cmd="projects">&gt;_ SHELL: projects</button>
+                <a href="https://github.com/rishav-netizen/c-image-filters" target="_blank" rel="noreferrer" class="inspect-btn">VIEW CODE ↗</a>
+              </div>
+            </article>
+
+            <!-- 02: embedded-doppler-visualizer -->
+            <article
+              id="project-snare"
+              class="hw-card project-card drum-piece-pod hw-card--wide"
+              data-card-tone="violet"
+              data-scroll-3d="right"
+            >
+              <div class="project-card__glow" aria-hidden="true"></div>
+              <div class="project-visual-stage">
+                <canvas class="project-preview-canvas" id="canvas-preview-doppler-hil" width="560" height="205" aria-label="Interactive supersonic Mach shockwave cone wave simulation"></canvas>
+                <div class="project-visual-overlay">
+                  <span class="project-visual-overlay__dot"></span>
+                  <span>SUPERSONIC CONE // CLICK TO TOGGLE MACH</span>
+                </div>
+                <span class="project-index-watermark">02</span>
+              </div>
+              <header class="hw-card__header">
+                <div class="hw-card__badges">
+                  <span class="hw-tag">02 // C++17 + ARDUINO</span>
+                  <span class="hw-status">● 60 HZ HIL</span>
+                </div>
+                <a href="https://github.com/rishav-netizen/embedded-doppler-visualizer" target="_blank" rel="noreferrer" class="hw-link">GITHUB ↗</a>
+              </header>
+              <div class="hw-card__body">
+                <h3>embedded-doppler-visualizer</h3>
+                <p class="hw-desc">
+                  Arduino 115.2k UART dial driving a live C++17 &amp; Raylib supersonic Mach cone simulator.
+                </p>
+                <svg class="waveform" viewBox="0 0 640 84" role="img" aria-label="Supersonic Mach wave preview">
+                  <path d="M0 46 L34 46 L43 44 L48 17 L54 62 L60 46 L108 46 L118 40 L126 53 L136 45 L176 45 L184 10 L193 77 L202 45 L250 45 L262 25 L273 65 L284 45 L328 45 L338 14 L350 72 L361 45 L408 45 L420 33 L431 58 L444 45 L488 45 L500 19 L510 70 L524 45 L566 45 L575 10 L584 80 L595 45 L640 45" />
+                </svg>
+                <div class="tag-row">
+                  <span>C++17</span><span>Raylib</span><span>Arduino Uno</span><span>POSIX Threads</span>
+                </div>
+              </div>
+              <div class="card-footer-actions">
+                <a href="https://github.com/rishav-netizen/embedded-doppler-visualizer" target="_blank" rel="noreferrer" class="inspect-btn">VIEW CODE ↗</a>
+              </div>
+            </article>
+
+            <!-- 03: karen-emergency-ai-BitnBuild-26 -->
+            <article
+              id="project-hihat"
+              class="hw-card project-card drum-piece-pod"
+              data-card-tone="white"
+              data-scroll-3d="up"
+            >
+              <div class="project-card__glow" aria-hidden="true"></div>
+              <div class="project-visual-stage project-visual-stage--compact">
+                <canvas class="project-preview-canvas" id="canvas-preview-karen-ai" width="560" height="175" aria-label="Tactical 3D geospatial PyDeck city dispatch grid"></canvas>
+                <div class="project-visual-overlay">
+                  <span class="project-visual-overlay__dot"></span>
+                  <span>PYDECK 3D // GEOSPATIAL DISPATCH RADAR</span>
+                </div>
+                <span class="project-index-watermark">03</span>
+              </div>
+              <header class="hw-card__header">
+                <div class="hw-card__badges">
+                  <span class="hw-tag">03 // AI DISPATCH</span>
+                  <span class="hw-status">● FASTAPI</span>
+                </div>
+                <a href="https://github.com/rishav-netizen/karen-emergency-ai-BitnBuild-26" target="_blank" rel="noreferrer" class="hw-link">GITHUB ↗</a>
+              </header>
+              <div class="hw-card__body">
+                <h3>Karen’s Ear // SpidyCAD</h3>
+                <p class="hw-desc">
+                  6-phase emergency triage engine with a 3D PyDeck city dispatch map.
+                </p>
+                <div class="tag-row">
+                  <span>Python 3.11</span><span>FastAPI</span><span>PyDeck 3D</span><span>Scikit-Learn</span>
+                </div>
+              </div>
+              <div class="card-footer-actions">
+                <a href="https://github.com/rishav-netizen/karen-emergency-ai-BitnBuild-26" target="_blank" rel="noreferrer" class="inspect-btn">VIEW CODE ↗</a>
+              </div>
+            </article>
+
+            <!-- 04: cpp-arduino-control -->
+            <article
+              id="project-racktom"
+              class="hw-card project-card drum-piece-pod"
+              data-card-tone="violet"
+              data-scroll-3d="up"
+            >
+              <div class="project-card__glow" aria-hidden="true"></div>
+              <div class="project-visual-stage project-visual-stage--compact">
+                <canvas class="project-preview-canvas" id="canvas-preview-cpp-arduino" width="560" height="175" aria-label="POSIX 115200-baud UART oscilloscope trace and serial stream"></canvas>
+                <div class="project-visual-overlay">
+                  <span class="project-visual-overlay__dot"></span>
+                  <span>POSIX TERMIOS // 115.2k UART OSCILLOSCOPE</span>
+                </div>
+                <span class="project-index-watermark">04</span>
+              </div>
+              <header class="hw-card__header">
+                <div class="hw-card__badges">
+                  <span class="hw-tag">04 // SERIAL I/O</span>
+                  <span class="hw-status">● POSIX</span>
+                </div>
+                <a href="https://github.com/rishav-netizen/cpp-arduino-control" target="_blank" rel="noreferrer" class="hw-link">GITHUB ↗</a>
+              </header>
+              <div class="hw-card__body">
+                <h3>cpp-arduino-control</h3>
+                <p class="hw-desc">
+                  Zero-latency C++ &amp; POSIX termios serial bridge for microcontrollers.
+                </p>
+                <div class="tag-row">
+                  <span>C++</span><span>PlatformIO</span><span>POSIX Termios</span>
+                </div>
+              </div>
+              <div class="card-footer-actions">
+                <a href="https://github.com/rishav-netizen/cpp-arduino-control" target="_blank" rel="noreferrer" class="inspect-btn">VIEW CODE ↗</a>
+              </div>
+            </article>
+
+            <!-- 05: 3D-Snail -->
+            <article
+              id="project-floortom"
+              class="hw-card project-card drum-piece-pod"
+              data-card-tone="white"
+              data-scroll-3d="up"
+            >
+              <div class="project-card__glow" aria-hidden="true"></div>
+              <div class="project-visual-stage project-visual-stage--compact">
+                <canvas class="project-preview-canvas" id="canvas-preview-3d-snail" width="560" height="175" aria-label="Kinetic 3D logarithmic spiral helix with pointer tracking"></canvas>
+                <div class="project-visual-overlay">
+                  <span class="project-visual-overlay__dot"></span>
+                  <span>GSAP KINETIC // 3D LOGARITHMIC SPIRAL</span>
+                </div>
+                <span class="project-index-watermark">05</span>
+              </div>
+              <header class="hw-card__header">
+                <div class="hw-card__badges">
+                  <span class="hw-tag">05 // 3D MOTION</span>
+                  <span class="hw-status">● GSAP</span>
+                </div>
+                <a href="https://github.com/rishav-netizen/3D-Snail" target="_blank" rel="noreferrer" class="hw-link">GITHUB ↗</a>
+              </header>
+              <div class="hw-card__body">
+                <h3>3D-Snail</h3>
+                <p class="hw-desc">
+                  Interactive 3D logarithmic spiral driven by CSS perspective and GSAP springs.
+                </p>
+                <div class="tag-row">
+                  <span>JavaScript</span><span>GSAP Springs</span><span>CSS 3D</span>
+                </div>
+              </div>
+              <div class="card-footer-actions">
+                <a href="https://github.com/rishav-netizen/3D-Snail" target="_blank" rel="noreferrer" class="inspect-btn">VIEW CODE ↗</a>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <!-- ======================================================================
+             SECTION 03: 16-STEP WAVEFORM SYNTHESIZER
+             ====================================================================== -->
+        <section id="sequencer-section" class="section-block fullpage-section scene-3d" data-morph-stop aria-labelledby="matrix-title">
+          <header class="section-header" data-parallax-depth="0.08">
+            <div>
+              <p class="section-comment">03 // SYNTH</p>
+              <h2 id="matrix-title">Make Some <em>Noise</em></h2>
+            </div>
+            <span class="section-counter">03 / 07</span>
+          </header>
+
+          <div class="matrix-banner hw-card" data-scroll-3d="up">
+            <div class="matrix-header">
+              <div class="matrix-header-main">
+                <h3 class="playground-card-title">16-Step Groove Box</h3>
+              </div>
+
+              <div class="amp-knob-module" aria-label="Tempo rotary dial">
+                <div class="amp-plate">
+                  <span class="amp-plate-label">TEMPO DIAL</span>
+                  <div class="knob-assembly">
+                    <div
+                      class="knob-face"
+                      id="bpm-dial"
+                      role="slider"
+                      tabindex="0"
+                      aria-label="BPM Rotary Knob"
+                      aria-valuemin="60"
+                      aria-valuemax="220"
+                      aria-valuenow="128"
+                      aria-valuetext="128 BPM"
+                    >
+                      <div class="knob-indicator"></div>
+                      <div class="knob-core">
+                        <span class="knob-metal-dot"></span>
+                      </div>
+                    </div>
+                    <div class="knob-step-controls">
+                      <button class="knob-nudge-btn" id="bpm-minus-btn" type="button" aria-label="Decrease BPM">−</button>
+                      <button class="knob-nudge-btn" id="bpm-plus-btn" type="button" aria-label="Increase BPM">+</button>
+                    </div>
+                  </div>
+                  <div class="amp-tick-row">
+                    <button class="amp-notch" data-bpm="80" type="button">80</button>
+                    <button class="amp-notch" data-bpm="100" type="button">100</button>
+                    <button class="amp-notch is-active" data-bpm="128" type="button">128</button>
+                    <button class="amp-notch" data-bpm="160" type="button">160</button>
+                    <button class="amp-notch" data-bpm="176" type="button">176</button>
+                    <button class="amp-notch" data-bpm="200" type="button">200</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Master Gain / Volume Module -->
+              <div class="amp-knob-module volume-module" aria-label="Master volume control">
+                <div class="amp-plate">
+                  <span class="amp-plate-label">MASTER GAIN</span>
+                  <div class="volume-slider-wrap">
+                    <button class="knob-nudge-btn" id="vol-minus-btn" type="button" aria-label="Decrease Volume">−</button>
+                    <input
+                      type="range"
+                      id="volume-slider"
+                      class="volume-range-input"
+                      min="0"
+                      max="100"
+                      value="85"
+                      aria-label="Master Gain Slider"
+                    />
+                    <button class="knob-nudge-btn" id="vol-plus-btn" type="button" aria-label="Increase Volume">+</button>
+                  </div>
+                  <div class="amp-tick-row vol-notch-row">
+                    <button class="amp-notch vol-notch" data-vol="0" type="button">0%</button>
+                    <button class="amp-notch vol-notch" data-vol="40" type="button">40%</button>
+                    <button class="amp-notch vol-notch is-active" data-vol="85" type="button">85%</button>
+                    <button class="amp-notch vol-notch" data-vol="100" type="button">MAX</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="matrix-readout">
+                <strong id="sequencer-bpm">128 BPM</strong>
+                <span id="sequencer-status">STOPPED</span>
+                <span class="matrix-sub-readout" id="sequencer-step-readout">STEP 00 / 16</span>
+                <span class="amp-mood-badge" id="bpm-mood-badge">128 BPM</span>
+                <span class="amp-mood-badge vol-mood-badge" id="volume-badge">85% VOL</span>
+              </div>
+            </div>
+
+            <canvas id="led-canvas" aria-label="Live LED dot matrix waveform"></canvas>
+            <div class="sequencer-track" id="sequencer-track" role="grid" aria-label="Sixteen step sequencer"></div>
+
+            <div class="matrix-hud">
+              <div class="matrix-preset-bar">
+                <span class="preset-label">GROOVES:</span>
+                <button class="micro-pad" data-preset="polyrhythm" type="button">7/8 CADENCE</button>
+                <button class="micro-pad" data-preset="polyphia" type="button">PLAYING GOD</button>
+                <button class="micro-pad" data-preset="porcaro" type="button">BEAT IT</button>
+                <button class="micro-pad" data-preset="techno" type="button">4/4 DRIVE</button>
+                <button class="micro-pad" data-preset="funk" type="button">BREAKBEAT</button>
+                <button class="micro-pad" data-preset="clear" type="button">CLEAR</button>
+              </div>
+              <div class="matrix-pad-group">
+                <button class="micro-pad" data-hit="kick" type="button">[SPACE] KICK</button>
+                <button class="micro-pad" data-hit="rim" type="button">[J] SNARE</button>
+                <button class="micro-pad" data-hit="hat" type="button">[K] HI-HAT</button>
+                <button class="micro-pad micro-pad--loop" id="loop-toggle" type="button" aria-pressed="false">▶ LOOP</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================================
+             SECTION 04: JOURNEY & TIMELINE
+             ====================================================================== -->
+        <section id="experience" class="section-block fullpage-section scene-3d" data-morph-stop aria-labelledby="experience-title">
+          <header class="section-header" data-parallax-depth="0.08">
+            <div>
+              <p class="section-comment">
+                04 // TIMELINE
+                <span class="sr-only">SECTION 03 // EXPERIENCE &amp; ELEVATION TIMELINE</span>
+              </p>
+              <h2 id="experience-title">My <em>Journey</em></h2>
+            </div>
+            <span class="section-counter">04 / 07</span>
+          </header>
+
+          <div class="elevation-timeline">
+            <article class="timeline-row" data-scroll-3d="up">
+              <div class="elevation-bar" style="--height: 36%"><span></span></div>
+              <div class="timeline-year">SHIMLA</div>
+              <div class="timeline-copy">
+                <h3>Roots in the Hills</h3>
+                <p>Born May 4, 2007. Started on tabla in 6th grade before moving to the kit.</p>
+              </div>
+              <div class="timeline-metric">ROOTS<br /><strong>SHIMLA</strong></div>
+            </article>
+
+            <article class="timeline-row" data-scroll-3d="up">
+              <div class="elevation-bar" style="--height: 68%"><span></span></div>
+              <div class="timeline-year">JAM PADS</div>
+              <div class="timeline-copy">
+                <h3>Drumming by Ear</h3>
+                <p>Self-taught on Tama kits with ProMark sticks—playing Polyphia, Plini, and MJ.</p>
+              </div>
+              <div class="timeline-metric">STICKS<br /><strong>PROMARK</strong></div>
+            </article>
+
+            <article class="timeline-row" data-scroll-3d="up">
+              <div class="elevation-bar" style="--height: 98%"><span></span></div>
+              <div class="timeline-year">NOW</div>
+              <div class="timeline-copy">
+                <h3>IIIT Bhubaneswar</h3>
+                <p>B.Tech CSE. Low-level C/C++, robotics, AR, and distance running.</p>
+              </div>
+              <div class="timeline-metric">5K / 10K<br /><strong>27:58 / 1:02</strong></div>
+            </article>
+          </div>
+        </section>
+
+        <!-- ======================================================================
+             SECTION 05: LEETCODE PROBLEM SOLVING
+             ====================================================================== -->
+        <section id="leetcode" class="section-block scene-3d" data-morph-stop aria-labelledby="leetcode-title">
+          <header class="section-header" data-parallax-depth="0.08">
+            <div>
+              <p class="section-comment">05 // ALGORITHMS</p>
+              <h2 id="leetcode-title">LeetCode &amp; <em>Problem Solving</em></h2>
+            </div>
+            <span class="section-counter">05 / 07</span>
+          </header>
+
+          <div class="platform-section-layout">
+            <!-- Big Stat & Progress Card -->
+            <article class="hw-card platform-hero-card" data-card-tone="cyan" data-scroll-3d="left">
+              <div class="platform-card__header">
+                <div class="benchmark-badge-group">
+                  <span class="hw-tag">LEETCODE // @rishav_leet</span>
+                  <span class="hw-status" id="leetcode-sync-status">● LIVE SYNC</span>
+                </div>
+                <a href="https://leetcode.com/u/rishav_leet/" target="_blank" rel="noopener noreferrer" class="hw-link">PROFILE ↗</a>
+              </div>
+
+              <div class="platform-metric-display">
+                <span class="platform-large-metric" id="leetcode-total-solved">149</span>
+                <div class="platform-metric-meta">
+                  <span class="platform-metric-label">PROBLEMS SOLVED</span>
+                  <span class="platform-sub-telemetry" id="leetcode-sub-telemetry">ACCEPTANCE 57.3% · WRITTEN IN C, C++ &amp; PYTHON</span>
+                </div>
+              </div>
+
+              <!-- Linear Gauge Meters -->
+              <div class="platform-bars-group">
+                <div class="platform-bar-row">
+                  <div class="platform-bar-info">
+                    <span class="easy-accent">EASY</span>
+                    <span id="leetcode-easy-count">95 SOLVED</span>
+                  </div>
+                  <div class="platform-bar-track">
+                    <div class="platform-bar-fill easy-fill" id="leetcode-easy-fill" style="width: 63.8%"></div>
+                  </div>
+                </div>
+
+                <div class="platform-bar-row">
+                  <div class="platform-bar-info">
+                    <span class="medium-accent">MEDIUM</span>
+                    <span id="leetcode-medium-count">49 SOLVED</span>
+                  </div>
+                  <div class="platform-bar-track">
+                    <div class="platform-bar-fill medium-fill" id="leetcode-medium-fill" style="width: 32.9%"></div>
+                  </div>
+                </div>
+
+                <div class="platform-bar-row">
+                  <div class="platform-bar-info">
+                    <span class="hard-accent">HARD</span>
+                    <span id="leetcode-hard-count">5 SOLVED</span>
+                  </div>
+                  <div class="platform-bar-track">
+                    <div class="platform-bar-fill hard-fill" id="leetcode-hard-fill" style="width: 3.3%"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="platform-cta-row">
+                <a href="https://leetcode.com/u/rishav_leet/" target="_blank" rel="noopener noreferrer" class="btn-primary">LEETCODE PROFILE ↗</a>
+              </div>
+            </article>
+
+            <!-- Side Grid: Core Patterns -->
+            <div class="platform-side-column">
+              <article class="hw-card" data-card-tone="white" data-scroll-3d="up">
+                <header class="hw-card__header">
+                  <span class="hw-tag">TOPICS</span>
+                  <span class="hw-status">O(N) / O(log N)</span>
+                </header>
+                <div class="hw-card__body">
+                  <h3>Core Patterns</h3>
+                  <div class="pattern-pill-grid">
+                    <span class="pattern-pill">Dynamic Programming</span>
+                    <span class="pattern-pill">Graph DFS / BFS</span>
+                    <span class="pattern-pill">Sliding Window</span>
+                    <span class="pattern-pill">Bit Manipulation</span>
+                    <span class="pattern-pill">Binary Search</span>
+                    <span class="pattern-pill">Heaps &amp; Queues</span>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================================
+             SECTION 06: OPEN SOURCE & GITHUB REPOSITORIES
+             ====================================================================== -->
+        <section id="github" class="section-block scene-3d" data-morph-stop aria-labelledby="github-title">
+          <header class="section-header" data-parallax-depth="0.08">
+            <div>
+              <p class="section-comment">
+                06 // OPEN SOURCE
+                <span class="sr-only">SECTION 04 // FIELD REPORTS &amp; DOWNLINKS</span>
+              </p>
+              <h2 id="github-title">GitHub &amp; <em>Archive</em></h2>
+            </div>
+            <span class="section-counter">06 / 07</span>
+          </header>
+
+          <!-- Big Stat Counter Bar -->
+          <div class="github-stats-bar" data-scroll-3d="up">
+            <div class="gh-stat-block">
+              <span class="gh-stat-num">50</span>
+              <span class="gh-stat-label">REPOS</span>
+            </div>
+            <div class="gh-stat-block">
+              <span class="gh-stat-num">380+</span>
+              <span class="gh-stat-label">COMMITS</span>
+            </div>
+            <div class="gh-stat-block">
+              <span class="gh-stat-num">5</span>
+              <span class="gh-stat-label">LANGUAGES</span>
+            </div>
+            <div class="gh-stat-block">
+              <span class="gh-stat-num">100%</span>
+              <span class="gh-stat-label">FROM SCRATCH</span>
+            </div>
+          </div>
+
+          <!-- Unified Quick Archive Directory -->
+          <div class="report-list" data-scroll-3d="up">
+            <a class="report-row" href="https://github.com/rishav-netizen/Project-Euler" target="_blank" rel="noreferrer">
+              <span class="report-code">TX-01</span>
+              <span class="report-title">Project-Euler — 81 math proofs &amp; Python solutions</span>
+              <span class="report-badge">PYTHON 3</span>
+              <span class="report-link">↗</span>
+            </a>
+            <a class="report-row" href="https://github.com/rishav-netizen/c-image-filters" target="_blank" rel="noreferrer">
+              <span class="report-code">TX-02</span>
+              <span class="report-title">c-image-filters — Pure C99 2D convolution engine</span>
+              <span class="report-badge">C99</span>
+              <span class="report-link">↗</span>
+            </a>
+            <a class="report-row" href="https://github.com/rishav-netizen/embedded-doppler-visualizer" target="_blank" rel="noreferrer">
+              <span class="report-code">TX-03</span>
+              <span class="report-title">embedded-doppler-visualizer — Arduino + Raylib Mach sim</span>
+              <span class="report-badge">C++17</span>
+              <span class="report-link">↗</span>
+            </a>
+            <a class="report-row" href="https://github.com/rishav-netizen/karen-emergency-ai-BitnBuild-26" target="_blank" rel="noreferrer">
+              <span class="report-code">TX-04</span>
+              <span class="report-title">karen-emergency-ai — AI triage &amp; 3D PyDeck map</span>
+              <span class="report-badge">FASTAPI</span>
+              <span class="report-link">↗</span>
+            </a>
+            <a class="report-row" href="https://github.com/rishav-netizen/cpp-arduino-control" target="_blank" rel="noreferrer">
+              <span class="report-code">TX-05</span>
+              <span class="report-title">cpp-arduino-control — Raw POSIX serial bridge</span>
+              <span class="report-badge">POSIX</span>
+              <span class="report-link">↗</span>
+            </a>
+            <a class="report-row" href="https://github.com/rishav-netizen?tab=repositories" target="_blank" rel="noreferrer">
+              <span class="report-code">TX-06</span>
+              <span class="report-title">rishav-netizen — All 50 public repositories</span>
+              <span class="report-badge">ALL</span>
+              <span class="report-link">↗</span>
+            </a>
+          </div>
+
+          <div class="github-action-footer" data-scroll-3d="up">
+            <div class="quick-terminal-box">
+              <span class="quick-term-prompt">git clone</span>
+              <span class="quick-term-cmd" id="quick-clone-cmd">https://github.com/rishav-netizen/c-image-filters.git</span>
+            </div>
+            <a href="https://github.com/rishav-netizen?tab=repositories" target="_blank" rel="noreferrer" class="btn-primary">BROWSE ALL 50 REPOSITORIES ↗</a>
+          </div>
+        </section>
+
+        <!-- ======================================================================
+             SECTION 07: PROJECT EULER MATHEMATICAL ARCHIVE + LIVE PROOF SWITCHER
+             ====================================================================== -->
+        <section id="euler" class="section-block scene-3d" data-morph-stop aria-labelledby="euler-title">
+          <header class="section-header" data-parallax-depth="0.08">
+            <div>
+              <p class="section-comment">07 // NUMBER THEORY</p>
+              <h2 id="euler-title">Project Euler &amp; <em>Math Puzzles</em></h2>
+            </div>
+            <span class="section-counter">07 / 07</span>
+          </header>
+
+          <div class="euler-grid">
+            <!-- Hero Discipline Card -->
+            <article class="hw-card euler-hero-card" data-card-tone="violet" data-scroll-3d="left">
+              <header class="hw-card__header">
+                <div class="benchmark-badge-group">
+                  <span class="hw-tag">@lichu7_Euler</span>
+                  <span class="hw-status">● 81 SOLVED</span>
+                </div>
+                <a href="https://github.com/rishav-netizen/Project-Euler" target="_blank" rel="noreferrer" class="hw-link">REPO ↗</a>
+              </header>
+              <div class="hw-card__body">
+                <div class="euler-headline-wrap">
+                  <span class="euler-symbol">∑</span>
+                  <div>
+                    <h3>81 Problems Solved</h3>
+                    <p class="hw-desc">
+                      Number theory, prime sieves, and combinatorics in Python 3.
+                    </p>
+                  </div>
+                </div>
+                <div class="euler-metrics-row">
+                  <div class="euler-stat-pod">
+                    <span class="euler-stat-num">81</span>
+                    <span class="euler-stat-label">SOLVED</span>
+                  </div>
+                  <div class="euler-stat-pod">
+                    <span class="euler-stat-num">85</span>
+                    <span class="euler-stat-label">TACKLED</span>
+                  </div>
+                  <div class="euler-stat-pod">
+                    <span class="euler-stat-num">100%</span>
+                    <span class="euler-stat-label">WITH PROOFS</span>
+                  </div>
+                </div>
+
+                <!-- Interactive Mathematical Proof & Search-Space Reduction Switcher (No Code Spoilers) -->
+                <div class="euler-proof-explorer" id="euler-proof-switcher">
+                  <div class="euler-proof-header">
+                    <span class="euler-proof-kicker">PROOF REDUCTIONS</span>
+                    <div class="euler-problem-tabs" role="tablist" aria-label="Select Project Euler mathematical proof">
+                      <button type="button" class="euler-tab-btn is-active" data-euler-problem="1" role="tab" aria-selected="true">#001 · Gauss</button>
+                      <button type="button" class="euler-tab-btn" data-euler-problem="2" role="tab" aria-selected="false">#002 · Fib</button>
+                      <button type="button" class="euler-tab-btn" data-euler-problem="10" role="tab" aria-selected="false">#010 · Sieve</button>
+                      <button type="button" class="euler-tab-btn" data-euler-problem="14" role="tab" aria-selected="false">#014 · Collatz</button>
+                      <button type="button" class="euler-tab-btn" data-euler-problem="67" role="tab" aria-selected="false">#067 · DP</button>
+                    </div>
+                  </div>
+
+                  <div class="euler-proof-stage">
+                    <div class="euler-math-callout">
+                      <span class="euler-math-title" id="euler-proof-title">#001 // MULTIPLES OF 3 OR 5</span>
+                      <p class="euler-math-formula" id="euler-proof-math">
+                        S(3) + S(5) − S(15) via Gauss’s identity S(k) = k · m(m + 1) / 2.
+                      </p>
+                    </div>
+
+                    <div class="euler-complexity-strip">
+                      <div class="euler-comp-chip">
+                        <span>REDUCTION</span>
+                        <strong id="euler-proof-reduction">999 checks → 3 ops</strong>
+                      </div>
+                      <div class="euler-comp-chip">
+                        <span>TIME</span>
+                        <strong id="euler-proof-time">O(1)</strong>
+                      </div>
+                      <div class="euler-comp-chip">
+                        <span>SPACE</span>
+                        <strong id="euler-proof-space">O(1)</strong>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="platform-cta-row">
+                <a href="https://github.com/rishav-netizen/Project-Euler" target="_blank" rel="noreferrer" class="btn-primary">SOLUTIONS REPO ↗</a>
+                <a href="https://projecteuler.net/profile/lichu7_Euler.png" target="_blank" rel="noreferrer" class="btn-secondary">BADGE ↗</a>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <!-- ======================================================================
+             FULL-PAGE CONTACT FINALE
+             ====================================================================== -->
+        <section id="contact" class="contact-section fullpage-section scene-3d" data-morph-stop aria-labelledby="contact-title">
+          <h2 id="contact-title">
+            Let’s build something<br /><span>real</span> <em>together.</em>
+          </h2>
+          <div class="contact-actions contact-actions--centerpiece">
+            <div class="contact-side-group contact-side-group--left">
+              <a href="https://github.com/rishav-netizen" target="_blank" rel="noreferrer" class="contact-btn">↗ GitHub</a>
+              <a href="https://leetcode.com/u/rishav_leet/" target="_blank" rel="noopener noreferrer" class="contact-btn">↗ LeetCode</a>
+            </div>
+            <a
+              href="mailto:rishavkumar2k07@gmail.com"
+              id="lets-connect-btn"
+              class="btn-primary venom-connect-btn venom-connect-btn--hero"
+              data-venom-btn
+            >
+              <span class="venom-btn-core">
+                <span class="venom-btn-title">✉ LET’S CONNECT ↗</span>
+                <small class="venom-btn-sub">rishavkumar2k07@gmail.com</small>
+              </span>
+            </a>
+            <div class="contact-side-group contact-side-group--right">
+              <a href="https://github.com/rishav-netizen/Project-Euler" target="_blank" rel="noreferrer" class="contact-btn">↗ Project Euler</a>
+              <a href="#hero-scroll-track" data-scroll-to="hero-scroll-track" class="contact-btn contact-btn--top">↑ Top</a>
+            </div>
+          </div>
+          <footer class="site-footer">
+            <span>RISHAV KUMAR · IIIT BHUBANESWAR</span>
+          </footer>
+        </section>
+      </main>
+    </div>
+
+    <!-- ======================================================================
+         ARCADE GAME MODE MODAL (SUMMONED VIA TOP NAVBAR GAME BUTTON)
+         ====================================================================== -->
+    <div id="game-mode-backdrop" class="game-mode-backdrop" aria-hidden="true"></div>
+    <aside
+      id="game-mode-modal"
+      class="game-mode-modal"
+      aria-label="Interactive arcade game mode"
+      aria-hidden="true"
+      data-lenis-prevent
+    >
+      <div class="game-mode-chassis" data-lenis-prevent>
+        <header class="game-mode-header">
+          <div class="game-mode-title-group">
+            <span class="game-mode-dot"></span>
+            <span class="game-mode-id">Mini Arcade</span>
+          </div>
+          <div class="game-mode-tabs" role="tablist" aria-label="Select arcade game mode">
+            <button
+              type="button"
+              class="game-mode-tab active"
+              data-arcade-mode="runner"
+              role="tab"
+              aria-selected="true"
+            >
+              Night Run
+            </button>
+            <button
+              type="button"
+              class="game-mode-tab"
+              data-arcade-mode="rhythm"
+              role="tab"
+              aria-selected="false"
+            >
+              Drum Pad
+            </button>
+          </div>
+          <button
+            type="button"
+            id="game-mode-close-btn"
+            class="terminal-close-btn"
+            aria-label="Close game mode"
+          >
+            Esc
+          </button>
+        </header>
+
+        <div class="game-mode-telemetry-bar">
+          <div class="arcade-stat-box">
+            <span class="arcade-stat-label">Score</span>
+            <strong id="arcade-score">0</strong>
+          </div>
+          <div class="arcade-stat-box">
+            <span class="arcade-stat-label">Best</span>
+            <strong id="arcade-hiscore">0</strong>
+          </div>
+          <div class="arcade-stat-box">
+            <span class="arcade-stat-label">Streak</span>
+            <strong id="arcade-combo">1×</strong>
+          </div>
+          <div class="arcade-stat-box">
+            <span class="arcade-stat-label">Distance</span>
+            <strong id="arcade-metric">0.00 km</strong>
+          </div>
+        </div>
+
+        <div class="arcade-stage-wrap">
+          <canvas
+            id="arcade-canvas"
+            class="arcade-canvas"
+            width="820"
+            height="360"
+            aria-label="Playable Night Run and Drum Pad mini-games"
+          ></canvas>
+        </div>
+
+        <footer class="game-mode-footer">
+          <p id="arcade-status-banner" class="arcade-status-banner" hidden></p>
+          <div id="arcade-controls-runner" class="arcade-controls-row">
+            <button type="button" class="arcade-pad-btn" data-arcade-action="jump"><kbd>Space</kbd> Jump</button>
+            <button type="button" class="arcade-pad-btn" data-arcade-action="crouch"><kbd>↓</kbd> Duck</button>
+            <button type="button" class="arcade-pad-btn arcade-pad-btn--accent" data-arcade-action="shockwave"><kbd>J</kbd> Clear Drone</button>
+            <button type="button" class="arcade-pad-btn" data-arcade-action="restart"><kbd>R</kbd> Reset</button>
+          </div>
+          <div id="arcade-controls-rhythm" class="arcade-controls-row" hidden>
+            <button type="button" class="arcade-pad-btn" data-arcade-action="lane-0"><kbd>Space</kbd> Kick</button>
+            <button type="button" class="arcade-pad-btn arcade-pad-btn--accent" data-arcade-action="lane-1"><kbd>J</kbd> Snare</button>
+            <button type="button" class="arcade-pad-btn" data-arcade-action="lane-2"><kbd>K</kbd> Hi-Hat</button>
+            <button type="button" class="arcade-pad-btn" data-arcade-action="restart"><kbd>R</kbd> Reset</button>
+          </div>
+        </footer>
+      </div>
+    </aside>
+
+    <!-- ======================================================================
+         SLIDE-OVER TERMINAL DRAWER (SUMMONED VIA ⌘K OR FLOATING PILL)
+         ====================================================================== -->
+    <div id="terminal-backdrop" class="terminal-backdrop" aria-hidden="true"></div>
+    <aside
+      id="terminal-section"
+      class="terminal-anywhere-shell"
+      aria-label="Interactive command shell"
+      aria-hidden="true"
+      data-lenis-prevent
+    >
+      <div class="terminal-chassis" data-lenis-prevent>
+        <div class="terminal-hud-header">
+          <span class="terminal-hud-id">RISHAV // INTERACTIVE SHELL</span>
+          <button
+            type="button"
+            id="terminal-close-btn"
+            class="terminal-close-btn"
+            aria-label="Close terminal drawer"
+          >
+            [ESC]
+          </button>
+        </div>
+
+        <div class="terminal-window" id="terminal-body" role="log" aria-live="polite" data-lenis-prevent></div>
+
+        <form class="terminal-input-bar" id="terminal-form" autocomplete="off">
+          <span class="terminal-prompt-text">&gt;</span>
+          <input
+            type="text"
+            id="terminal-input"
+            class="terminal-input-field"
+            placeholder="try: whoami, playlist, drums, running, projects, help..."
+            spellcheck="false"
+            autocomplete="off"
+            aria-label="Terminal command line input"
+          />
+          <button type="submit" class="terminal-run-btn">RUN ↵</button>
+        </form>
+
+        <!-- Single Muted Monospace Quick-Run Line -->
+        <div class="terminal-quick-line">
+          <span>QUICK:</span>
+          <button type="button" class="term-inline-cmd" data-term-cmd="whoami">[whoami]</button>
+          <button type="button" class="term-inline-cmd" data-term-cmd="playlist">[playlist]</button>
+          <button type="button" class="term-inline-cmd" data-term-cmd="drums">[drums]</button>
+          <button type="button" class="term-inline-cmd" data-term-cmd="neofetch">[neofetch]</button>
+          <button type="button" class="term-inline-cmd" data-term-cmd="projects">[projects]</button>
+          <button type="button" class="term-inline-cmd" data-term-cmd="play kick">[play kick]</button>
+          <button type="button" class="term-inline-cmd" data-term-cmd="clear">[clear]</button>
+          <button type="button" class="sr-only" data-term-cmd="play snare">[play snare]</button>
+          <button type="button" class="sr-only" data-term-cmd="bpm 176">[bpm 176]</button>
+        </div>
+      </div>
+    </aside>
+
+    <div id="warp-overlay" class="warp-overlay" aria-hidden="true">
+      <span class="warp-streak"></span>
+      <span class="warp-streak"></span>
+      <span class="warp-streak"></span>
+      <span class="warp-streak"></span>
+      <span class="warp-streak"></span>
+    </div>
+    <p id="warp-status" class="sr-only" role="status" aria-live="polite"></p>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
