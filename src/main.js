@@ -630,10 +630,6 @@ floatingTerminalBtn?.addEventListener('click', () => {
   if (soundEnabled) audio.hit('hat', { count: false, strength: 0.3 });
   toggleTerminalModal();
 });
-$('#hero-terminal-trigger')?.addEventListener('click', () => {
-  if (soundEnabled) audio.hit('hat', { count: false, strength: 0.3 });
-  toggleTerminalModal();
-});
 $('#terminal-close-btn')?.addEventListener('click', () => {
   if (soundEnabled) audio.hit('hat', { count: false, strength: 0.3 });
   closeTerminalModal();
@@ -1267,14 +1263,14 @@ function renderKineticTypography() {
       const dx = px - cx;
       const dy = py - cy;
       const dist = Math.hypot(dx, dy);
-      const radius = 180;
+      const radius = 210;
       if (dist < radius) {
         const inf = Math.pow(1 - dist / radius, 1.5);
-        st.tx = (-dx / radius) * 6 * inf;
-        st.ty = (-dy / radius) * 5 * inf;
-        st.tz = 12 * inf;
-        st.trx = (dy / radius) * -4 * inf;
-        st.try = (dx / radius) * 4 * inf;
+        st.tx = (-dx / radius) * 16 * inf;
+        st.ty = (-dy / radius) * 14 * inf;
+        st.tz = 44 * inf;
+        st.trx = (dy / radius) * -26 * inf;
+        st.try = (dx / radius) * 28 * inf;
         st.tglow = inf;
       } else {
         st.tx = 0;
@@ -1310,8 +1306,8 @@ function renderKineticTypography() {
 // In-place Hero Stage Reveal Lock:
 // At scrollY = 0, scrolling first drives heroRevealTarget (0 -> 1) to reveal the monumental name
 // letter-by-letter with 3D depth, cipher decoding, and laser scanline before scrolling the page down.
-let heroRevealTarget = 1;
-let heroRevealCurrent = 1;
+let heroRevealTarget = 0;
+let heroRevealCurrent = 0;
 let heroLockShockwaveFired = false;
 const HERO_REVEAL_SCROLL_BUDGET = 680;
 
@@ -1350,72 +1346,183 @@ function applyHeroKitProgress(progress) {
   const currentScrollY = lenis ? scrollState.scroll : window.scrollY;
   updateHeroScrollCue(p, currentScrollY);
 
+  // Stage 1 (p: 0.02 -> 0.68): Staggered 3D Per-Character Kinetic Assembly + Cipher Decode + Laser Scanline
+  const nameT = smoothstep(0.01, 0.68, p);
+  const totalChars = Math.max(heroCharStates.length, 1);
+
   if (monumentalText) {
-    monumentalText.style.visibility = 'visible';
-    monumentalText.style.opacity = '1';
-    monumentalText.style.pointerEvents = 'auto';
+    monumentalText.style.visibility = nameT > 0.002 ? 'visible' : 'hidden';
+    monumentalText.style.opacity = Math.min(1, nameT * 1.35).toFixed(3);
+    monumentalText.style.pointerEvents = 'none';
     monumentalText.style.transform = 'none';
 
-    heroCharStates.forEach((st) => {
-      st.el.style.setProperty('--char-alpha', '1');
-      st.el.style.setProperty('--reveal-x', '0px');
-      st.el.style.setProperty('--reveal-y', '0px');
-      st.el.style.setProperty('--reveal-z', '0px');
-      st.el.style.setProperty('--reveal-rx', '0deg');
-      st.el.style.setProperty('--reveal-ry', '0deg');
-      st.el.style.setProperty('--reveal-scale', '1');
-      st.el.style.setProperty('--reveal-blur', '0px');
-      st.el.style.setProperty('--reveal-flash', '0');
+    heroCharStates.forEach((st, idx) => {
+      const charStart = 0.02 + (idx / totalChars) * 0.36;
+      const charEnd = charStart + 0.28;
+      const ct = smoothstep(charStart, charEnd, p);
+      const inv = 1 - ct;
 
-      if (st.el.textContent !== st.targetChar) st.el.textContent = st.targetChar;
-      st.el.classList.remove('is-decoding');
+      const dirY = st.lineIdx === 0 ? -1 : 1;
+      const revX = st.normOffset * 115 * inv;
+      const revY = dirY * 72 * inv;
+      const revZ = -280 * inv;
+      const revRx = dirY * 82 * inv;
+      const revRy = st.normOffset * -54 * inv;
+      const revScale = 0.38 + ct * 0.62;
+      const revBlur = (inv * 11).toFixed(1);
+      const flash = ct > 0.55 && ct < 0.98 ? Math.sin(((ct - 0.55) / 0.43) * Math.PI) : 0;
+
+      st.el.style.setProperty('--char-alpha', Math.min(1, ct * 1.4).toFixed(3));
+      st.el.style.setProperty('--reveal-x', `${revX.toFixed(1)}px`);
+      st.el.style.setProperty('--reveal-y', `${revY.toFixed(1)}px`);
+      st.el.style.setProperty('--reveal-z', `${revZ.toFixed(1)}px`);
+      st.el.style.setProperty('--reveal-rx', `${revRx.toFixed(1)}deg`);
+      st.el.style.setProperty('--reveal-ry', `${revRy.toFixed(1)}deg`);
+      st.el.style.setProperty('--reveal-scale', revScale.toFixed(3));
+      st.el.style.setProperty('--reveal-blur', `${revBlur}px`);
+      st.el.style.setProperty('--reveal-flash', flash.toFixed(3));
+
+      if (ct > 0.08 && ct < 0.84) {
+        const glyphIdx = Math.floor(p * 48 + idx * 7) % HERO_CIPHER_GLYPHS.length;
+        const nextGlyph = HERO_CIPHER_GLYPHS[glyphIdx];
+        if (st.el.textContent !== nextGlyph) st.el.textContent = nextGlyph;
+        st.el.classList.add('is-decoding');
+      } else {
+        if (st.el.textContent !== st.targetChar) st.el.textContent = st.targetChar;
+        st.el.classList.remove('is-decoding');
+      }
     });
 
     if (heroScanlineEl) {
-      heroScanlineEl.style.opacity = '0';
+      const scanActive = p > 0.03 && p < 0.68;
+      const scanPos = smoothstep(0.03, 0.66, p) * 104;
+      const scanAlpha = scanActive ? Math.sin(smoothstep(0.03, 0.66, p) * Math.PI) : 0;
+      heroScanlineEl.style.top = `${scanPos.toFixed(1)}%`;
+      heroScanlineEl.style.opacity = scanAlpha.toFixed(3);
+      heroScanlineEl.style.transform = `scaleX(${(0.35 + scanAlpha * 0.65).toFixed(3)})`;
+    }
+
+    if (p >= 0.64 && !heroLockShockwaveFired) {
+      heroLockShockwaveFired = true;
+      background.shockwave(1.35);
+      heroKitStage?.triggerHit('kick', 1.25);
+    } else if (p < 0.35) {
+      heroLockShockwaveFired = false;
     }
 
     const kicker = monumentalText.querySelector('.monumental-greek-kicker');
     if (kicker) {
-      kicker.style.transform = 'none';
-      kicker.style.opacity = '1';
+      const kickerT = smoothstep(0.35, 0.68, p);
+      kicker.style.transform = `translate3d(0, ${((1 - kickerT) * -18).toFixed(1)}px, 0)`;
+      kicker.style.opacity = kickerT.toFixed(2);
     }
   }
 
-  // Fixed navbar, telemetry coordinates, hero CTAs, and floating dock
+  // Stage 2 (p: 0.58 -> 0.94): Reveal fixed navbar, coordinates, hero CTAs, and floating dock.
+  const navT = smoothstep(0.58, 0.94, p);
+  const isInteractive = navT > 0.25;
+
   if (navbarEl) {
-    navbarEl.style.visibility = 'visible';
-    navbarEl.style.opacity = '1';
-    navbarEl.style.transform = 'none';
-    navbarEl.style.pointerEvents = 'auto';
+    const navY = (1 - navT) * -28;
+    navbarEl.style.visibility = navT > 0.005 ? 'visible' : 'hidden';
+    navbarEl.style.opacity = navT.toFixed(3);
+    navbarEl.style.transform = `translateY(${navY.toFixed(1)}px)`;
+    navbarEl.style.pointerEvents = isInteractive ? 'auto' : 'none';
   }
 
   if (runnerHudStripEl) {
-    runnerHudStripEl.style.visibility = 'visible';
-    runnerHudStripEl.style.opacity = '1';
-    runnerHudStripEl.style.transform = 'translateX(-50%)';
-    runnerHudStripEl.style.pointerEvents = 'auto';
+    const beatActive = Boolean(marioRunner?.isBeatActive?.());
+    const effectiveT = beatActive ? 1 : navT;
+    const stripY = (1 - effectiveT) * 32;
+    runnerHudStripEl.style.visibility = effectiveT > 0.005 ? 'visible' : 'hidden';
+    runnerHudStripEl.style.opacity = effectiveT.toFixed(3);
+    runnerHudStripEl.style.transform = `translateX(-50%) translateY(${stripY.toFixed(1)}px)`;
+    runnerHudStripEl.style.pointerEvents = isInteractive || beatActive ? 'auto' : 'none';
   }
 
   if (heroCoordsEl) {
-    heroCoordsEl.style.visibility = 'visible';
-    heroCoordsEl.style.opacity = '1';
-    heroCoordsEl.style.transform = 'none';
+    heroCoordsEl.style.visibility = navT > 0.005 ? 'visible' : 'hidden';
+    heroCoordsEl.style.opacity = navT.toFixed(3);
+    heroCoordsEl.style.transform = `translateY(${((1 - navT) * 14).toFixed(1)}px)`;
   }
 
   if (heroFooterEl) {
-    heroFooterEl.style.visibility = 'visible';
-    heroFooterEl.style.opacity = '1';
-    heroFooterEl.style.transform = 'none';
-    heroFooterEl.style.pointerEvents = 'auto';
+    heroFooterEl.style.visibility = navT > 0.005 ? 'visible' : 'hidden';
+    heroFooterEl.style.opacity = navT.toFixed(3);
+    heroFooterEl.style.transform = `translateY(${((1 - navT) * 14).toFixed(1)}px)`;
+    heroFooterEl.style.pointerEvents = navT > 0.1 ? 'auto' : 'none';
   }
 
   if (floatingDockEl) {
-    floatingDockEl.style.visibility = 'visible';
-    floatingDockEl.style.opacity = '1';
-    floatingDockEl.style.pointerEvents = 'auto';
+    floatingDockEl.style.visibility = navT > 0.005 ? 'visible' : 'hidden';
+    floatingDockEl.style.opacity = navT.toFixed(3);
+    floatingDockEl.style.pointerEvents = isInteractive ? 'auto' : 'none';
   }
 }
+
+// Intercept wheel & touch scroll at the top of the page (scrollY <= 4) so scrolling
+// FIRST completes the Hero Name & Navbar reveal in place before scrolling the page down!
+window.addEventListener(
+  'wheel',
+  (event) => {
+    if (document.documentElement.dataset.soundcheck === 'pending' || terminalModalOpen || arcade.isOpen || !motionEnabled) return;
+    const scrollY = lenis ? scrollState.scroll : window.scrollY;
+
+    if (event.deltaY > 0 && scrollY <= 6 && heroRevealCurrent < 0.985) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      lenis?.stop();
+      const step = Math.min(Math.max(event.deltaY, 14), 95) / HERO_REVEAL_SCROLL_BUDGET;
+      heroRevealTarget = Math.min(1, heroRevealTarget + step);
+      return;
+    }
+
+    if (event.deltaY < 0 && scrollY <= 2 && heroRevealTarget > 0) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      lenis?.stop();
+      const step = Math.min(Math.max(Math.abs(event.deltaY), 14), 95) / HERO_REVEAL_SCROLL_BUDGET;
+      heroRevealTarget = Math.max(0, heroRevealTarget - step);
+    }
+  },
+  { passive: false, capture: true }
+);
+
+let touchStartY = 0;
+window.addEventListener(
+  'touchstart',
+  (event) => {
+    if (event.touches.length === 1) {
+      touchStartY = event.touches[0].clientY;
+    }
+  },
+  { passive: true, capture: true }
+);
+
+window.addEventListener(
+  'touchmove',
+  (event) => {
+    if (document.documentElement.dataset.soundcheck === 'pending' || terminalModalOpen || arcade.isOpen || !motionEnabled) return;
+    if (event.touches.length !== 1) return;
+    const currentY = event.touches[0].clientY;
+    const deltaY = touchStartY - currentY;
+    touchStartY = currentY;
+    const scrollY = lenis ? scrollState.scroll : window.scrollY;
+
+    if (deltaY > 0 && scrollY <= 6 && heroRevealCurrent < 0.985) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      lenis?.stop();
+      heroRevealTarget = Math.min(1, heroRevealTarget + (deltaY * 1.6) / HERO_REVEAL_SCROLL_BUDGET);
+    } else if (deltaY < 0 && scrollY <= 2 && heroRevealTarget > 0) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      lenis?.stop();
+      heroRevealTarget = Math.max(0, heroRevealTarget + (deltaY * 1.6) / HERO_REVEAL_SCROLL_BUDGET);
+    }
+  },
+  { passive: false, capture: true }
+);
 
 function initializeScrollEffects() {
   // 1. Differential 3D parallax on the fixed canvas
@@ -1432,19 +1539,15 @@ function initializeScrollEffects() {
     },
   });
 
-  // 2. Hero Scroll Parallax & Stage progression
+  // 2. Hero ScrollTrigger observer
   ScrollTrigger.create({
     trigger: '#hero-scroll-track',
     start: 'top top',
     end: 'bottom top',
     scrub: true,
     onUpdate: (self) => {
-      heroKitStage?.setProgress(self.progress);
-      if (monumentalText) {
-        const fade = Math.max(0, 1 - self.progress * 1.6);
-        const yOffset = self.progress * 100;
-        monumentalText.style.opacity = fade.toFixed(3);
-        monumentalText.style.transform = `translate3d(0, ${yOffset.toFixed(1)}px, 0)`;
+      if (self.progress > 0.05 && heroRevealTarget < 1) {
+        unlockHeroRevealImmediately();
       }
     },
   });
@@ -1608,7 +1711,12 @@ function setSoundcheckFinalState() {
     x: 0,
     y: 0,
   });
-  unlockHeroRevealImmediately();
+  if (window.scrollY > 12 || !motionEnabled) {
+    unlockHeroRevealImmediately();
+  } else {
+    lenis?.stop();
+    applyHeroKitProgress(heroRevealCurrent);
+  }
 }
 
 function revealStage() {
@@ -1672,42 +1780,138 @@ async function runSoundcheck() {
     return;
   }
 
-  // Fast calibration so visitor sees content immediately
-  document.body.style.overflow = '';
-  unlockHeroRevealImmediately();
+  // Lock scroll immediately
+  document.body.style.overflow = 'hidden';
+  if (mainContent) {
+    mainContent.inert = false;
+    mainContent.removeAttribute('inert');
+  }
+  lenis?.stop();
+  gsap.set('.navbar', { autoAlpha: 0, y: -28, pointerEvents: 'none' });
+  gsap.set('.hero-top-coordinates, .hero-minimal-footer, .floating-dock', { autoAlpha: 0, y: 20 });
+
+  // Wait for portrait asset or max 450ms
+  await Promise.race([portrait.ready, new Promise((resolve) => window.setTimeout(resolve, 450))]);
 
   // Build character spans
   const firstChars = buildNameRow('sc-name-first', NAME_FIRST);
   const lastChars  = buildNameRow('sc-name-last',  NAME_LAST);
   const allChars   = [...firstChars, ...lastChars];
 
-  allChars.forEach(({ span, target }) => {
-    span.textContent = target;
-    span.style.opacity = '1';
-    span.classList.add('is-solved');
+  // Add the horizontal sweep line
+  const sweepLine = document.createElement('div');
+  sweepLine.className = 'sc-sweep-line';
+  soundcheckPreloader.appendChild(sweepLine);
+
+  const separator = $('.sc-name-separator');
+
+  // Phase 1: Fade in chars (staggered, still showing scrambled glyphs)
+  const STAGGER_MS   = 52;   // gap between each letter appearing
+  const SCRAMBLE_MS  = 340;  // how long each char scrambles before resolving
+  const HOLD_MS      = 320;  // pause after all chars resolve before exit
+
+  // Fade each char in (opacity + y) before scrambling
+  allChars.forEach(({ span }, i) => {
+    gsap.to(span, {
+      opacity: 1,
+      y: 0,
+      duration: 0.28,
+      delay: i * (STAGGER_MS / 1000),
+      ease: 'power2.out',
+    });
   });
 
-  const progressEl = $('#soundcheck-progress');
-  const meterEl    = $('#soundcheck-meter-fill');
-  const statusEl   = $('#soundcheck-status');
-  if (progressEl) progressEl.textContent = '100';
-  if (meterEl) meterEl.style.width = '100%';
-  if (statusEl) statusEl.textContent = '> READY // CALIBRATION COMPLETE';
-  setSoundcheckLine(1, true);
-  setSoundcheckLine(2, true);
-  setSoundcheckLine(3, true);
-  setSoundcheckLine(4, true);
+  // Progress bar counter runs in parallel
+  const totalFadeIn  = allChars.length * STAGGER_MS;
+  const totalScramble = SCRAMBLE_MS;
+  const totalDiag    = totalFadeIn + totalScramble;
 
+  const progress = { value: 0 };
+  gsap.to(progress, {
+    value: 100,
+    duration: (totalDiag + HOLD_MS) / 1000,
+    ease: 'none',
+    onUpdate: () => {
+      const v = Math.round(progress.value);
+      const progressEl = $('#soundcheck-progress');
+      const meterEl    = $('#soundcheck-meter-fill');
+      const statusEl   = $('#soundcheck-status');
+      if (progressEl) progressEl.textContent = String(v).padStart(2, '0');
+      if (meterEl)    meterEl.style.width = `${v}%`;
+      if (statusEl) {
+        statusEl.textContent =
+          v < 30  ? '> CALIBRATING 2,200-NODE POINT CLOUD'
+          : v < 60 ? '> ASSEMBLING NAME HOLOGRAM'
+          : v < 85 ? '> LOCKING 3D DEPTH FIELD'
+          :          '> OPENING STAGE';
+      }
+      setSoundcheckLine(1, v >= 22);
+      setSoundcheckLine(2, v >= 44);
+      setSoundcheckLine(3, v >= 66);
+      setSoundcheckLine(4, v >= 85);
+    },
+  });
+
+  // Phase 2: After all chars are visible, start scramble-resolve cascade
+  await new Promise((resolve) => window.setTimeout(resolve, totalFadeIn + 60));
+
+  let resolvedCount = 0;
+  const totalChars = allChars.length;
+
+  await new Promise((resolveAll) => {
+    allChars.forEach(({ span, target }, i) => {
+      const delay = i * 38; // slight cascade from left to right
+      window.setTimeout(() => {
+        scrambleChar(span, target, SCRAMBLE_MS, () => {
+          resolvedCount += 1;
+          if (resolvedCount === totalChars) resolveAll(undefined);
+        });
+      }, delay);
+    });
+  });
+
+  // Phase 3: Separator line appears + shockwave sound hit
+  if (separator) separator.classList.add('is-visible');
   heroKitStage?.triggerHit('kick', 1.0);
   background.shockwave(1.4, { x: window.innerWidth * 0.5, y: window.innerHeight * 0.52 });
 
-  await new Promise((resolve) => window.setTimeout(resolve, 350));
+  // Phase 4: Horizontal cyan scanline sweeps across the full name
+  gsap.timeline()
+    .set(sweepLine, { opacity: 1, x: '-100%' })
+    .to(sweepLine, {
+      x: '100%',
+      duration: 0.48,
+      ease: 'power2.inOut',
+    })
+    .to(sweepLine, { opacity: 0, duration: 0.12 });
+
+  // Phase 5: Brief hold so the name sits fully resolved
+  await new Promise((resolve) => window.setTimeout(resolve, HOLD_MS));
+
+  // Phase 6: Final kick + explosion on background canvas
+  heroKitStage?.triggerHit('kick', 1.8);
+  background.shockwave(1.9, { x: window.innerWidth * 0.5, y: window.innerHeight * 0.52 });
+  background.explode?.(1.9);
+
+  // Phase 7: All chars pulse to full white briefly
+  allChars.forEach(({ span }, i) => {
+    gsap.to(span, {
+      textShadow: '0 0 60px rgba(125,211,252,0.9), 0 0 120px rgba(125,211,252,0.4)',
+      duration: 0.14,
+      delay: i * 0.018,
+      yoyo: true,
+      repeat: 1,
+    });
+  });
+
+  // Phase 8: Baffles slide apart revealing the site (no card, no box — full screen opens)
+  await new Promise((resolve) => window.setTimeout(resolve, 180));
 
   gsap
     .timeline({ onComplete: () => revealStage() })
-    .to('.soundcheck-baffle--left',  { xPercent: -100, duration: 0.35, ease: 'power3.inOut' })
-    .to('.soundcheck-baffle--right', { xPercent: 100,  duration: 0.35, ease: 'power3.inOut' }, '<')
-    .to('.sc-name-stage, .sc-hud-corner, .sc-sweep-line', { autoAlpha: 0, duration: 0.18 }, '<0.08');
+    .to('.soundcheck-baffle--left',  { xPercent: -100, duration: 0.52, ease: 'power3.inOut' })
+    .to('.soundcheck-baffle--right', { xPercent: 100,  duration: 0.52, ease: 'power3.inOut' }, '<')
+    .to('.sc-name-stage, .sc-hud-corner, .sc-sweep-line', { autoAlpha: 0, duration: 0.22 }, '<0.16');
 }
 
 const venomSymbiote = new VenomSymbioteEffect();

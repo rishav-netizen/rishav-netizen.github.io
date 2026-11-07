@@ -752,7 +752,6 @@ export class HeroDrumKitStage {
     const scaleBase = Math.min(this.width, this.height) / 380;
 
     // Ambient Corona + Relativistic Singularity Core
-    // Subtle ambient aura (non-opaque)
     const coreGlow = ctx.createRadialGradient(
       centerX,
       centerY,
@@ -761,32 +760,42 @@ export class HeroDrumKitStage {
       centerY,
       Math.min(this.width, this.height) * 0.46
     );
-    coreGlow.addColorStop(0, `${colors.accent}14`);
-    coreGlow.addColorStop(0.5, `${colors.violet}08`);
-    coreGlow.addColorStop(1, 'rgba(0,0,0,0)');
+    coreGlow.addColorStop(0, `${colors.accent}24`);
+    coreGlow.addColorStop(0.45, `${colors.violet}12`);
+    coreGlow.addColorStop(1, `${colors.violet}00`);
     ctx.fillStyle = coreGlow;
     ctx.fillRect(0, 0, this.width, this.height);
 
-    // Luminous Polyrhythmic Orbital Ring during Phase 0 (pure starlight halo, zero opaque black disk)
+    // Draw Black Hole Event Horizon & Lensed Photon Ring during Phase 0
     if (singularityPresence > 0.02) {
-      const ringRadius = (50 + this.hitPulse.kick * 10) * scaleBase * (0.6 + singularityPresence * 0.4);
+      const bhRadius = (46 + this.hitPulse.kick * 8) * scaleBase * (0.4 + singularityPresence * 0.6);
       ctx.save();
-      const photonGrad = ctx.createRadialGradient(centerX, centerY, ringRadius * 0.7, centerX, centerY, ringRadius * 1.5);
-      photonGrad.addColorStop(0, `${colors.cyan}30`);
-      photonGrad.addColorStop(0.5, `${colors.violet}14`);
+      ctx.globalCompositeOperation = 'source-over';
+      // Outer photon halo
+      const photonGrad = ctx.createRadialGradient(centerX, centerY, bhRadius * 0.78, centerX, centerY, bhRadius * 1.9);
+      photonGrad.addColorStop(0, colors.text);
+      photonGrad.addColorStop(0.28, colors.cyan);
+      photonGrad.addColorStop(0.62, `${colors.violet}66`);
       photonGrad.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.globalAlpha = singularityPresence * 0.6;
+      ctx.globalAlpha = singularityPresence * 0.85;
       ctx.fillStyle = photonGrad;
       ctx.beginPath();
-      ctx.arc(centerX, centerY, ringRadius * 1.5, 0, Math.PI * 2);
+      ctx.arc(centerX, centerY, bhRadius * 1.9, 0, Math.PI * 2);
       ctx.fill();
 
-      // Delicate luminous orbital pulse ring
-      ctx.strokeStyle = colors.cyan;
-      ctx.lineWidth = 1.2;
-      ctx.globalAlpha = singularityPresence * 0.45;
+      // Abyssal Event Horizon shadow core
+      ctx.fillStyle = colors.isLight ? '#031211' : '#010206';
+      ctx.globalAlpha = singularityPresence * 0.96;
       ctx.beginPath();
-      ctx.arc(centerX, centerY, ringRadius, 0, Math.PI * 2);
+      ctx.arc(centerX, centerY, bhRadius, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Razor-thin Einstein photon ring
+      ctx.strokeStyle = colors.text;
+      ctx.lineWidth = 1.6;
+      ctx.globalAlpha = singularityPresence * 0.92;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, bhRadius * 1.03, 0, Math.PI * 2);
       ctx.stroke();
       ctx.restore();
     }
