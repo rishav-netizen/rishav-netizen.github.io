@@ -1207,10 +1207,6 @@
     >
       <div class="game-mode-chassis" data-lenis-prevent>
         <header class="game-mode-header">
-          <div class="game-mode-title-group">
-            <span class="game-mode-dot"></span>
-            <span class="game-mode-id">Mini Arcade</span>
-          </div>
           <div class="game-mode-tabs" role="tablist" aria-label="Select arcade game mode">
             <button
               type="button"
@@ -1231,40 +1227,37 @@
               Drum Pad
             </button>
           </div>
+
+          <div class="game-mode-hud-pills" aria-live="polite">
+            <div class="arcade-hud-pill">
+              <span>SCORE</span>
+              <strong id="arcade-score">0</strong>
+            </div>
+            <div class="arcade-hud-pill">
+              <span>BEST</span>
+              <strong id="arcade-hiscore">0</strong>
+            </div>
+            <div class="arcade-hud-pill arcade-hud-pill--streak">
+              <strong id="arcade-combo">1×</strong>
+            </div>
+            <span id="arcade-metric" class="sr-only">0.00 km</span>
+          </div>
+
           <button
             type="button"
             id="game-mode-close-btn"
-            class="terminal-close-btn"
+            class="game-mode-close-btn"
             aria-label="Close game mode"
           >
-            Esc
+            ✕
           </button>
         </header>
-
-        <div class="game-mode-telemetry-bar">
-          <div class="arcade-stat-box">
-            <span class="arcade-stat-label">Score</span>
-            <strong id="arcade-score">0</strong>
-          </div>
-          <div class="arcade-stat-box">
-            <span class="arcade-stat-label">Best</span>
-            <strong id="arcade-hiscore">0</strong>
-          </div>
-          <div class="arcade-stat-box">
-            <span class="arcade-stat-label">Streak</span>
-            <strong id="arcade-combo">1×</strong>
-          </div>
-          <div class="arcade-stat-box">
-            <span class="arcade-stat-label">Distance</span>
-            <strong id="arcade-metric">0.00 km</strong>
-          </div>
-        </div>
 
         <div class="arcade-stage-wrap">
           <canvas
             id="arcade-canvas"
             class="arcade-canvas"
-            width="820"
+            width="760"
             height="360"
             aria-label="Playable Night Run and Drum Pad mini-games"
           ></canvas>
@@ -1273,16 +1266,40 @@
         <footer class="game-mode-footer">
           <p id="arcade-status-banner" class="arcade-status-banner" hidden></p>
           <div id="arcade-controls-runner" class="arcade-controls-row">
-            <button type="button" class="arcade-pad-btn" data-arcade-action="jump"><kbd>Space</kbd> Jump</button>
-            <button type="button" class="arcade-pad-btn" data-arcade-action="crouch"><kbd>↓</kbd> Duck</button>
-            <button type="button" class="arcade-pad-btn arcade-pad-btn--accent" data-arcade-action="shockwave"><kbd>J</kbd> Clear Drone</button>
-            <button type="button" class="arcade-pad-btn" data-arcade-action="restart"><kbd>R</kbd> Reset</button>
+            <button type="button" class="arcade-pad-btn arcade-pad-btn--primary" data-arcade-action="jump">
+              <span>Jump</span>
+              <kbd>Space</kbd>
+            </button>
+            <button type="button" class="arcade-pad-btn" data-arcade-action="crouch">
+              <span>Duck</span>
+              <kbd>↓</kbd>
+            </button>
+            <button type="button" class="arcade-pad-btn arcade-pad-btn--accent" data-arcade-action="shockwave">
+              <span>Pulse</span>
+              <kbd>J</kbd>
+            </button>
+            <button type="button" class="arcade-pad-btn arcade-pad-btn--icon" data-arcade-action="restart" aria-label="Restart">
+              <span>↺</span>
+              <kbd>R</kbd>
+            </button>
           </div>
-          <div id="arcade-controls-rhythm" class="arcade-controls-row" hidden>
-            <button type="button" class="arcade-pad-btn" data-arcade-action="lane-0"><kbd>Space</kbd> Kick</button>
-            <button type="button" class="arcade-pad-btn arcade-pad-btn--accent" data-arcade-action="lane-1"><kbd>J</kbd> Snare</button>
-            <button type="button" class="arcade-pad-btn" data-arcade-action="lane-2"><kbd>K</kbd> Hi-Hat</button>
-            <button type="button" class="arcade-pad-btn" data-arcade-action="restart"><kbd>R</kbd> Reset</button>
+          <div id="arcade-controls-rhythm" class="arcade-controls-row arcade-controls-row--drums" hidden>
+            <button type="button" class="arcade-pad-btn arcade-drum-pad" data-arcade-action="lane-0" data-lane="0">
+              <span>Kick</span>
+              <kbd>Space</kbd>
+            </button>
+            <button type="button" class="arcade-pad-btn arcade-drum-pad arcade-pad-btn--accent" data-arcade-action="lane-1" data-lane="1">
+              <span>Snare</span>
+              <kbd>J</kbd>
+            </button>
+            <button type="button" class="arcade-pad-btn arcade-drum-pad" data-arcade-action="lane-2" data-lane="2">
+              <span>Hat</span>
+              <kbd>K</kbd>
+            </button>
+            <button type="button" class="arcade-pad-btn arcade-pad-btn--icon" data-arcade-action="restart" aria-label="Restart">
+              <span>↺</span>
+              <kbd>R</kbd>
+            </button>
           </div>
         </footer>
       </div>

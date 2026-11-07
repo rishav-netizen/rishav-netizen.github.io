@@ -1,9 +1,9 @@
 /**
  * MINI ARCADE // NIGHT RUN & STUDIO DRUM PAD
  * ------------------------------------------
- * Rich, atmospheric twilight mountain runner (inspired by Alto's Odyssey)
- * and tactile analog studio drum highway (inspired by Teenage Engineering / Push)
- * with physical 3D keycap tutorials—zero neon cyberpunk slop, zero flat blandness.
+ * Full 3-layer Himalayan mountain & pine parallax runner (with Jump/Double-Jump,
+ * Duck under high drones, and J Snare Shockwave for drone removal) plus 3-lane
+ * Studio Drum Pad, styled with a clean visual theme and mobile-friendly touch UX.
  */
 
 export class CadenceArcade {
@@ -16,6 +16,7 @@ export class CadenceArcade {
     this.W = 820;
     this.H = 360;
     this.dpr = 1;
+    this.isMobile = false;
 
     this.scoreEl = document.getElementById('arcade-score');
     this.hiScoreEl = document.getElementById('arcade-hiscore');
@@ -42,25 +43,27 @@ export class CadenceArcade {
       speed: 6 + (i % 4) * 4,
     }));
 
+    this.setupHighDPI();
     this.runner = this.createRunnerState();
     this.rhythm = this.createRhythmState();
 
-    this.setupHighDPI();
     this.bindUI();
     this.updateHUD();
   }
 
   createRunnerState() {
+    const px = this.isMobile ? 96 : 138;
+    const groundY = 308;
     return {
       state: 'tutorial', // 'tutorial' | 'playing' | 'gameover'
       score: 0,
       distanceKm: 0,
       combo: 1,
       speed: 360,
-      groundY: 308,
+      groundY,
       player: {
-        x: 138,
-        y: 308,
+        x: px,
+        y: groundY,
         vy: 0,
         jumpsUsed: 0,
         maxJumps: 2,
@@ -69,7 +72,7 @@ export class CadenceArcade {
         flipAngle: 0,
         shockwaveCooldown: 0,
         invulnerable: 0,
-        scarfPts: Array.from({ length: 7 }, (_, i) => ({ x: 138 - i * 6, y: 274 })),
+        scarfPts: Array.from({ length: 7 }, (_, i) => ({ x: px - i * 6, y: 274 })),
       },
       obstacles: [],
       orbs: [],
@@ -103,11 +106,20 @@ export class CadenceArcade {
 
   setupHighDPI() {
     if (!this.canvas) return;
-    const dpr = Math.min(window.devicePixelRatio || 1, 3);
-    if (this.dpr !== dpr || this.canvas.width !== Math.round(this.W * dpr)) {
+    const mobile = window.innerWidth <= 640;
+    const targetW = mobile ? 540 : 820;
+    const targetH = 360;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+    if (this.W !== targetW || this.H !== targetH || this.dpr !== dpr || this.canvas.width !== Math.round(targetW * dpr)) {
+      this.isMobile = mobile;
+      this.W = targetW;
+      this.H = targetH;
       this.dpr = dpr;
       this.canvas.width = Math.round(this.W * dpr);
       this.canvas.height = Math.round(this.H * dpr);
+      if (this.runner?.player) {
+        this.runner.player.x = mobile ? 96 : 138;
+      }
     }
   }
 
@@ -129,6 +141,7 @@ export class CadenceArcade {
       const trigger = (e) => {
         e.preventDefault();
         const action = btn.dataset.arcadeAction;
+        btn.classList.add('is-active');
         this.handleAction(action, true);
       };
       btn.addEventListener('mousedown', trigger);
@@ -136,6 +149,7 @@ export class CadenceArcade {
 
       const release = () => {
         const action = btn.dataset.arcadeAction;
+        btn.classList.remove('is-active');
         if (action === 'crouch') {
           this.handleAction('crouch', false);
         }
@@ -143,22 +157,25 @@ export class CadenceArcade {
       btn.addEventListener('mouseup', release);
       btn.addEventListener('mouseleave', release);
       btn.addEventListener('touchend', release);
+      btn.addEventListener('touchcancel', release);
     });
 
     if (this.canvas) {
+      let touchStartY = null;
       this.canvas.addEventListener('pointerdown', (e) => {
         const rect = this.canvas.getBoundingClientRect();
-        const x = ((e.clientX - rect.left) / rect.width) * this.W;
-        const y = ((e.clientY - rect.top) / rect.height) * this.H;
+        const x = ((e.clientX - rect.left) / Math.max(rect.width, 1)) * this.W;
+        const y = ((e.clientY - rect.top) / Math.max(rect.height, 1)) * this.H;
+        touchStartY = e.clientY;
 
         if (this.mode === 'runner') {
           if (this.runner.state !== 'playing') {
             this.startGame();
-          } else if (x > this.W * 0.68) {
+          } else if (x > this.W * 0.7) {
             this.handleAction('shockwave', true);
-          } else if (y > this.H * 0.72) {
+          } else if (y > this.H * 0.74) {
             this.handleAction('crouch', true);
-            setTimeout(() => this.handleAction('crouch', false), 340);
+            setTimeout(() => this.handleAction('crouch', false), 360);
           } else {
             this.handleAction('jump', true);
           }
@@ -169,7 +186,27 @@ export class CadenceArcade {
           this.triggerRhythmLane(lane);
         }
       });
+
+      this.canvas.addEventListener('pointermove', (e) => {
+        if (touchStartY !== null && this.mode === 'runner' && this.runner.state === 'playing') {
+          if (e.clientY - touchStartY > 28) {
+            this.handleAction('crouch', true);
+          }
+        }
+      });
+
+      const endCanvasTouch = () => {
+        if (touchStartY !== null && this.mode === 'runner') {
+          this.handleAction('crouch', false);
+        }
+        touchStartY = null;
+      };
+      this.canvas.addEventListener('pointerup', endCanvasTouch);
+      this.canvas.addEventListener('pointercancel', endCanvasTouch);
     }
+
+    window.addEventListener('keydown', (e) => this.handleKeyDown(e));
+    window.addEventListener('keyup', (e) => this.handleKeyUp(e));
   }
 
   setMode(mode) {
@@ -247,6 +284,7 @@ export class CadenceArcade {
   }
 
   startGame() {
+    this.setupHighDPI();
     if (this.mode === 'runner') {
       this.runner = this.createRunnerState();
       this.runner.state = 'playing';
@@ -311,12 +349,7 @@ export class CadenceArcade {
         else this.triggerRhythmLane(0);
         return true;
       }
-      if (
-        e.code === 'KeyJ' ||
-        e.code === 'KeyF' ||
-        e.code === 'ArrowDown' ||
-        e.code === 'ArrowUp'
-      ) {
+      if (e.code === 'KeyJ' || e.code === 'KeyF' || e.code === 'ArrowDown' || e.code === 'ArrowUp') {
         e.preventDefault();
         if (this.rhythm.state !== 'playing') this.startGame();
         else this.triggerRhythmLane(1);
@@ -378,13 +411,13 @@ export class CadenceArcade {
         }
       } else if (action === 'shockwave' && pressed) {
         if (p.shockwaveCooldown <= 0) {
-          p.shockwaveCooldown = 0.6;
+          p.shockwaveCooldown = 0.55;
           this.soundEngine?.playRim?.();
           r.shockwaves.push({
             x: p.x + 22,
             y: p.y - (p.crouching ? 18 : 32),
             radius: 14,
-            maxRadius: 185,
+            maxRadius: 210,
             alpha: 1,
           });
           r.obstacles.forEach((obs) => {
@@ -392,7 +425,7 @@ export class CadenceArcade {
               !obs.destroyed &&
               obs.type === 'drone' &&
               obs.x > p.x - 24 &&
-              obs.x < p.x + 260
+              obs.x < p.x + 280
             ) {
               obs.destroyed = true;
               r.score += 75 * r.combo;
@@ -525,10 +558,11 @@ export class CadenceArcade {
     r.spawnTimer -= dt;
     if (r.spawnTimer <= 0) {
       const roll = Math.random();
+      const spawnX = this.W + 30;
       if (roll < 0.36) {
         r.obstacles.push({
           type: 'hurdle',
-          x: 850,
+          x: spawnX,
           y: r.groundY - 38,
           w: 34,
           h: 38,
@@ -538,7 +572,7 @@ export class CadenceArcade {
         const tall = Math.random() > 0.45;
         r.obstacles.push({
           type: 'pillar',
-          x: 850,
+          x: spawnX,
           y: r.groundY - (tall ? 66 : 48),
           w: 28,
           h: tall ? 66 : 48,
@@ -548,7 +582,7 @@ export class CadenceArcade {
         const highAlt = Math.random() > 0.35;
         r.obstacles.push({
           type: 'drone',
-          x: 850,
+          x: spawnX,
           y: highAlt ? r.groundY - 76 : r.groundY - 94,
           w: 46,
           h: 26,
@@ -563,7 +597,7 @@ export class CadenceArcade {
     r.orbTimer -= dt;
     if (r.orbTimer <= 0) {
       r.orbs.push({
-        x: 850,
+        x: this.W + 30,
         y: r.groundY - (36 + Math.random() * 94),
         r: 10,
         phase: Math.random() * Math.PI * 2,
@@ -710,250 +744,48 @@ export class CadenceArcade {
   }
 
   getThemePalette() {
+    const root = getComputedStyle(document.documentElement);
     const theme = document.documentElement.getAttribute('data-theme') || 'sunset';
-    const palettes = {
-      sunset: {
-        isLight: false,
-        sky: ['#020307', '#0a1224', '#1e1b38', '#3b2439'],
-        bloom: ['rgba(125, 211, 252, 0.22)', 'rgba(192, 132, 252, 0.12)'],
-        moon: '#fef3c7',
-        moonCutout: '#091020',
-        mtn: ['rgba(24, 34, 62, 0.78)', 'rgba(16, 23, 44, 0.92)', '#090e1c'],
-        road: ['#111829', '#050811'],
-        roadLine: '#7dd3fc',
-        stud: 'rgba(192, 132, 252, 0.6)',
-        accent: '#7dd3fc',
-        secondary: '#c084fc',
-        warm: '#f59e0b',
-        hurdle: '#f97316',
-        pillar: '#c084fc',
-        drone: '#7dd3fc',
-        scarf: '#c084fc',
-        shoe: '#7dd3fc',
-        torso: '#f8fafc',
-        limbBack: 'rgba(148, 163, 184, 0.78)',
-        hair: '#0f172a',
-        cardBg: ['#10182b', '#080c17'],
-        cardBorder: 'rgba(125, 211, 252, 0.36)',
-        boxBg: 'rgba(15, 23, 42, 0.78)',
-        boxBorder: 'rgba(255, 255, 255, 0.08)',
-        textBright: '#f8fafc',
-        textMuted: '#94a3b8',
-        ctaText: '#020307',
-        laneColors: ['#7dd3fc', '#f8fafc', '#c084fc'],
-      },
-      dark: {
-        isLight: false,
-        sky: ['#04060d', '#0b1326', '#152238', '#1e293b'],
-        bloom: ['rgba(56, 189, 248, 0.24)', 'rgba(129, 140, 248, 0.12)'],
-        moon: '#e0f2fe',
-        moonCutout: '#091122',
-        mtn: ['rgba(23, 37, 68, 0.78)', 'rgba(15, 25, 48, 0.92)', '#080e1c'],
-        road: ['#0f172a', '#060913'],
-        roadLine: '#38bdf8',
-        stud: 'rgba(129, 140, 248, 0.6)',
-        accent: '#38bdf8',
-        secondary: '#818cf8',
-        warm: '#fbbf24',
-        hurdle: '#38bdf8',
-        pillar: '#818cf8',
-        drone: '#fbbf24',
-        scarf: '#38bdf8',
-        shoe: '#818cf8',
-        torso: '#ffffff',
-        limbBack: 'rgba(148, 163, 184, 0.78)',
-        hair: '#0f172a',
-        cardBg: ['#0f172a', '#080c18'],
-        cardBorder: 'rgba(56, 189, 248, 0.38)',
-        boxBg: 'rgba(18, 26, 46, 0.8)',
-        boxBorder: 'rgba(255, 255, 255, 0.08)',
-        textBright: '#ffffff',
-        textMuted: '#94a3b8',
-        ctaText: '#04060d',
-        laneColors: ['#38bdf8', '#ffffff', '#818cf8'],
-      },
-      ocean: {
-        isLight: false,
-        sky: ['#031211', '#062120', '#0a3130', '#114240'],
-        bloom: ['rgba(0, 174, 187, 0.28)', 'rgba(94, 234, 212, 0.12)'],
-        moon: '#ccfbf1',
-        moonCutout: '#051c1b',
-        mtn: ['rgba(13, 56, 54, 0.78)', 'rgba(9, 40, 38, 0.92)', '#041817'],
-        road: ['#072221', '#031211'],
-        roadLine: '#00aebb',
-        stud: 'rgba(94, 234, 212, 0.6)',
-        accent: '#00aebb',
-        secondary: '#5eead4',
-        warm: '#fbbf24',
-        hurdle: '#5eead4',
-        pillar: '#00aebb',
-        drone: '#fde68a',
-        scarf: '#5eead4',
-        shoe: '#00aebb',
-        torso: '#e8e4d3',
-        limbBack: 'rgba(131, 151, 148, 0.8)',
-        hair: '#031211',
-        cardBg: ['#072221', '#041413'],
-        cardBorder: 'rgba(0, 174, 187, 0.42)',
-        boxBg: 'rgba(11, 44, 42, 0.8)',
-        boxBorder: 'rgba(232, 228, 211, 0.1)',
-        textBright: '#ffffff',
-        textMuted: '#839794',
-        ctaText: '#031211',
-        laneColors: ['#00aebb', '#e8e4d3', '#5eead4'],
-      },
-      midnight: {
-        isLight: false,
-        sky: ['#140612', '#240c21', '#381332', '#4c1a36'],
-        bloom: ['rgba(234, 170, 0, 0.25)', 'rgba(230, 224, 240, 0.12)'],
-        moon: '#fef08a',
-        moonCutout: '#200a1d',
-        mtn: ['rgba(68, 24, 60, 0.78)', 'rgba(48, 16, 42, 0.92)', '#1e091b'],
-        road: ['#260d23', '#130511'],
-        roadLine: '#eaaa00',
-        stud: 'rgba(230, 224, 240, 0.55)',
-        accent: '#eaaa00',
-        secondary: '#e6e0f0',
-        warm: '#eaaa00',
-        hurdle: '#eaaa00',
-        pillar: '#e6e0f0',
-        drone: '#f472b6',
-        scarf: '#eaaa00',
-        shoe: '#e6e0f0',
-        torso: '#ffffff',
-        limbBack: 'rgba(168, 156, 181, 0.8)',
-        hair: '#140612',
-        cardBg: ['#280e24', '#160714'],
-        cardBorder: 'rgba(234, 170, 0, 0.4)',
-        boxBg: 'rgba(48, 18, 44, 0.82)',
-        boxBorder: 'rgba(230, 224, 240, 0.12)',
-        textBright: '#ffffff',
-        textMuted: '#a89cb5',
-        ctaText: '#1a0917',
-        laneColors: ['#eaaa00', '#ffffff', '#f472b6'],
-      },
-      'deep-dark': {
-        isLight: false,
-        sky: ['#070709', '#101015', '#191820', '#2b2218'],
-        bloom: ['rgba(234, 170, 0, 0.26)', 'rgba(221, 227, 232, 0.08)'],
-        moon: '#fde68a',
-        moonCutout: '#0e0e12',
-        mtn: ['rgba(38, 36, 46, 0.8)', 'rgba(24, 23, 30, 0.94)', '#0d0d11'],
-        road: ['#14131a', '#070709'],
-        roadLine: '#eaaa00',
-        stud: 'rgba(234, 170, 0, 0.6)',
-        accent: '#eaaa00',
-        secondary: '#dde3e8',
-        warm: '#eaaa00',
-        hurdle: '#eaaa00',
-        pillar: '#959ea6',
-        drone: '#dde3e8',
-        scarf: '#eaaa00',
-        shoe: '#eaaa00',
-        torso: '#ffffff',
-        limbBack: 'rgba(149, 158, 166, 0.78)',
-        hair: '#070709',
-        cardBg: ['#16151c', '#0b0b0f'],
-        cardBorder: 'rgba(234, 170, 0, 0.4)',
-        boxBg: 'rgba(26, 25, 32, 0.85)',
-        boxBorder: 'rgba(221, 227, 232, 0.1)',
-        textBright: '#ffffff',
-        textMuted: '#959ea6',
-        ctaText: '#070709',
-        laneColors: ['#eaaa00', '#ffffff', '#94a3b8'],
-      },
-      rainforest: {
-        isLight: false,
-        sky: ['#030a06', '#061810', '#0b291c', '#133b29'],
-        bloom: ['rgba(16, 185, 129, 0.26)', 'rgba(45, 212, 191, 0.12)'],
-        moon: '#d1fae5',
-        moonCutout: '#05140d',
-        mtn: ['rgba(16, 56, 38, 0.8)', 'rgba(10, 38, 25, 0.92)', '#04120b'],
-        road: ['#081c12', '#030a06'],
-        roadLine: '#10b981',
-        stud: 'rgba(45, 212, 191, 0.6)',
-        accent: '#10b981',
-        secondary: '#2dd4bf',
-        warm: '#a78bfa',
-        hurdle: '#10b981',
-        pillar: '#2dd4bf',
-        drone: '#a78bfa',
-        scarf: '#10b981',
-        shoe: '#2dd4bf',
-        torso: '#ecfdf5',
-        limbBack: 'rgba(134, 239, 172, 0.72)',
-        hair: '#030a06',
-        cardBg: ['#092015', '#04100a'],
-        cardBorder: 'rgba(16, 185, 129, 0.4)',
-        boxBg: 'rgba(13, 36, 24, 0.82)',
-        boxBorder: 'rgba(52, 211, 153, 0.14)',
-        textBright: '#ffffff',
-        textMuted: '#86efac',
-        ctaText: '#030a06',
-        laneColors: ['#10b981', '#ecfdf5', '#a78bfa'],
-      },
-      'blue-gray': {
-        isLight: false,
-        sky: ['#0d0c10', '#17151d', '#241f2b', '#382b24'],
-        bloom: ['rgba(230, 224, 240, 0.22)', 'rgba(217, 119, 6, 0.14)'],
-        moon: '#f5f5f4',
-        moonCutout: '#15131a',
-        mtn: ['rgba(46, 40, 56, 0.8)', 'rgba(31, 27, 38, 0.92)', '#110f16'],
-        road: ['#1a1721', '#0b0a0e'],
-        roadLine: '#e6e0f0',
-        stud: 'rgba(217, 119, 6, 0.6)',
-        accent: '#e6e0f0',
-        secondary: '#d97706',
-        warm: '#f59e0b',
-        hurdle: '#d97706',
-        pillar: '#e6e0f0',
-        drone: '#a39fa9',
-        scarf: '#d97706',
-        shoe: '#e6e0f0',
-        torso: '#ffffff',
-        limbBack: 'rgba(163, 159, 169, 0.8)',
-        hair: '#0d0c10',
-        cardBg: ['#1b1822', '#0f0d13'],
-        cardBorder: 'rgba(230, 224, 240, 0.35)',
-        boxBg: 'rgba(34, 30, 42, 0.85)',
-        boxBorder: 'rgba(229, 228, 226, 0.12)',
-        textBright: '#ffffff',
-        textMuted: '#a39fa9',
-        ctaText: '#0d0c10',
-        laneColors: ['#e6e0f0', '#d97706', '#a39fa9'],
-      },
-      light: {
-        isLight: true,
-        sky: ['#e6f2f2', '#f2efe4', '#f7f3e6', '#f5e4c8'],
-        bloom: ['rgba(245, 158, 11, 0.28)', 'rgba(0, 150, 164, 0.1)'],
-        moon: '#f59e0b',
-        moonCutout: null,
-        mtn: ['rgba(148, 178, 180, 0.55)', 'rgba(98, 134, 136, 0.72)', '#334e4f'],
-        road: ['#d8d2c1', '#c2bba8'],
-        roadLine: '#0096a4',
-        stud: 'rgba(3, 18, 17, 0.35)',
-        accent: '#0096a4',
-        secondary: '#3a0f34',
-        warm: '#d97706',
-        hurdle: '#e07a5f',
-        pillar: '#0096a4',
-        drone: '#3a0f34',
-        scarf: '#0096a4',
-        shoe: '#e07a5f',
-        torso: '#031211',
-        limbBack: 'rgba(36, 48, 48, 0.65)',
-        hair: '#031211',
-        cardBg: ['#ffffff', '#f7f5ee'],
-        cardBorder: 'rgba(0, 150, 164, 0.38)',
-        boxBg: '#eae6d8',
-        boxBorder: 'rgba(3, 18, 17, 0.1)',
-        textBright: '#031211',
-        textMuted: '#627271',
-        ctaText: '#ffffff',
-        laneColors: ['#0096a4', '#3a0f34', '#d97706'],
-      },
+    const isLight = theme === 'light';
+    const accent = root.getPropertyValue('--accent').trim() || (isLight ? '#0096a4' : '#7dd3fc');
+    const secondary = root.getPropertyValue('--matrix-violet').trim() || (isLight ? '#3a0f34' : '#c084fc');
+
+    return {
+      isLight,
+      sky: isLight
+        ? ['#f7f5ee', '#ede8d8', '#e2dcc8', '#d6ceb8']
+        : ['#020307', '#080e1e', '#11182d', '#192138'],
+      bloom: isLight
+        ? ['rgba(0, 150, 164, 0.14)', 'rgba(58, 15, 52, 0.06)']
+        : [`${accent}22`, `${secondary}12`],
+      moon: isLight ? '#f59e0b' : '#fef3c7',
+      moonCutout: isLight ? null : '#080e1e',
+      mtn: isLight
+        ? ['rgba(0, 150, 164, 0.14)', 'rgba(3, 18, 17, 0.18)', 'rgba(3, 18, 17, 0.28)']
+        : ['rgba(24, 34, 62, 0.78)', 'rgba(15, 22, 42, 0.92)', '#080d1a'],
+      road: isLight ? ['#e2ddd0', '#d5cebe'] : ['#0f1626', '#050811'],
+      roadLine: accent,
+      stud: isLight ? 'rgba(3, 18, 17, 0.25)' : 'rgba(148, 163, 184, 0.45)',
+      accent,
+      secondary,
+      warm: '#f59e0b',
+      hurdle: '#f97316',
+      pillar: '#fb7185',
+      drone: accent,
+      scarf: accent,
+      torso: isLight ? '#031211' : '#f8fafc',
+      limbBack: isLight ? '#627271' : '#64748b',
+      shoe: accent,
+      hair: isLight ? '#031211' : '#0f172a',
+      cardBg: isLight ? ['rgba(255, 255, 255, 0.95)', 'rgba(247, 245, 238, 0.95)'] : ['rgba(8, 12, 22, 0.92)', 'rgba(5, 8, 16, 0.95)'],
+      cardBorder: isLight ? 'rgba(3, 18, 17, 0.14)' : 'rgba(255, 255, 255, 0.12)',
+      boxBg: isLight ? 'rgba(3, 18, 17, 0.04)' : 'rgba(255, 255, 255, 0.04)',
+      boxBorder: isLight ? 'rgba(3, 18, 17, 0.1)' : 'rgba(255, 255, 255, 0.08)',
+      textBright: isLight ? '#031211' : '#f8fafc',
+      textMuted: isLight ? '#627271' : '#94a3b8',
+      ctaText: isLight ? '#ffffff' : '#020307',
+      laneColors: [accent, secondary, '#f59e0b'],
     };
-    return palettes[theme] || palettes.sunset;
   }
 
   renderRunner() {
@@ -969,7 +801,7 @@ export class CadenceArcade {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, W, H);
 
-    // 1. Theme-Reactive Sky Gradient
+    // 1. Sky Gradient
     const skyGrad = ctx.createLinearGradient(0, 0, 0, r.groundY);
     skyGrad.addColorStop(0, pal.sky[0]);
     skyGrad.addColorStop(0.45, pal.sky[1]);
@@ -978,14 +810,14 @@ export class CadenceArcade {
     ctx.fillStyle = skyGrad;
     ctx.fillRect(0, 0, W, H);
 
-    // Horizon atmospheric bloom
+    // Horizon bloom
     const sunGrad = ctx.createRadialGradient(
       W * 0.72,
       r.groundY - 30,
       8,
       W * 0.72,
       r.groundY - 30,
-      240
+      220
     );
     sunGrad.addColorStop(0, pal.bloom[0]);
     sunGrad.addColorStop(0.5, pal.bloom[1]);
@@ -993,7 +825,7 @@ export class CadenceArcade {
     ctx.fillStyle = sunGrad;
     ctx.fillRect(0, 0, W, r.groundY);
 
-    // 2. Starfield (in dark themes) & Crescent Moon / Morning Sun (in light theme)
+    // 2. Starfield & Crescent Moon
     if (!pal.isLight) {
       this.stars.forEach((st) => {
         const sx = (st.x - r.bgScroll * 0.04 * (st.speed / 10) + W * 4) % W;
@@ -1006,26 +838,26 @@ export class CadenceArcade {
     }
 
     ctx.save();
-    const moonX = 670;
-    const moonY = 64;
+    const moonX = W * 0.82;
+    const moonY = 58;
     ctx.fillStyle = pal.moon;
     ctx.beginPath();
-    ctx.arc(moonX, moonY, 15, 0, Math.PI * 2);
+    ctx.arc(moonX, moonY, 14, 0, Math.PI * 2);
     ctx.fill();
     if (pal.moonCutout) {
       ctx.fillStyle = pal.moonCutout;
       ctx.beginPath();
-      ctx.arc(moonX - 5, moonY - 3, 13.5, 0, Math.PI * 2);
+      ctx.arc(moonX - 5, moonY - 3, 12.5, 0, Math.PI * 2);
       ctx.fill();
     }
     ctx.restore();
 
     // 3. Three Parallax Himalayan Mountain Ridges + Pine Silhouettes
-    this.drawMountainLayer(ctx, W, r.groundY, r.bgScroll, 0.14, 115, 34, 18, pal.mtn[0], false);
-    this.drawMountainLayer(ctx, W, r.groundY, r.bgScroll, 0.28, 74, 24, 14, pal.mtn[1], true);
-    this.drawMountainLayer(ctx, W, r.groundY, r.bgScroll, 0.48, 36, 14, 8, pal.mtn[2], true);
+    this.drawMountainLayer(ctx, W, r.groundY, r.bgScroll, 0.14, 110, 32, 16, pal.mtn[0], false);
+    this.drawMountainLayer(ctx, W, r.groundY, r.bgScroll, 0.28, 70, 22, 12, pal.mtn[1], true);
+    this.drawMountainLayer(ctx, W, r.groundY, r.bgScroll, 0.48, 34, 13, 7, pal.mtn[2], true);
 
-    // 4. Theme-Reactive Road Deck & Reflective Track Markers
+    // 4. Road Deck & Reflective Track Markers
     const roadGrad = ctx.createLinearGradient(0, r.groundY, 0, H);
     roadGrad.addColorStop(0, pal.road[0]);
     roadGrad.addColorStop(1, pal.road[1]);
@@ -1044,27 +876,15 @@ export class CadenceArcade {
     for (let x = -offset; x < W + tickSpacing; x += tickSpacing) {
       ctx.fillStyle = pal.stud;
       ctx.fillRect(x, r.groundY + 5, 10, 2.5);
-
-      ctx.strokeStyle = pal.isLight ? 'rgba(3, 18, 17, 0.12)' : 'rgba(148, 163, 184, 0.14)';
-      ctx.lineWidth = 1.2;
-      ctx.beginPath();
-      ctx.moveTo(x, r.groundY + 12);
-      ctx.lineTo(x - 22, H);
-      ctx.stroke();
     }
 
     // 5. Collectible Vinyl / Rhythm Medallions
     r.orbs.forEach((orb) => {
       const bobY = orb.y + Math.sin(orb.phase) * 3.5;
       ctx.save();
-      ctx.fillStyle = pal.isLight ? 'rgba(0, 150, 164, 0.14)' : 'rgba(251, 191, 36, 0.16)';
-      ctx.beginPath();
-      ctx.arc(orb.x, bobY, orb.r + 5, 0, Math.PI * 2);
-      ctx.fill();
-
       ctx.fillStyle = pal.isLight ? '#ffffff' : '#1e293b';
       ctx.strokeStyle = pal.accent;
-      ctx.lineWidth = 2.2;
+      ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.arc(orb.x, bobY, orb.r, 0, Math.PI * 2);
       ctx.fill();
@@ -1072,17 +892,17 @@ export class CadenceArcade {
 
       ctx.fillStyle = pal.warm;
       ctx.beginPath();
-      ctx.arc(orb.x, bobY, 3.8, 0, Math.PI * 2);
+      ctx.arc(orb.x, bobY, 3.5, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
     });
 
-    // 6. Theme-Reactive Obstacles (Track Hurdles, Pillars, Rotary Drones)
+    // 6. Obstacles (Track Hurdles, Pillars, Rotary Drones)
     r.obstacles.forEach((obs) => {
       ctx.save();
       if (obs.type === 'hurdle') {
         ctx.strokeStyle = pal.textMuted;
-        ctx.lineWidth = 3;
+        ctx.lineWidth = 2.5;
         ctx.beginPath();
         ctx.moveTo(obs.x + 6, obs.y + 8);
         ctx.lineTo(obs.x + 4, obs.y + obs.h);
@@ -1091,54 +911,31 @@ export class CadenceArcade {
         ctx.stroke();
 
         ctx.fillStyle = pal.hurdle;
-        ctx.strokeStyle = pal.textBright;
-        ctx.lineWidth = 1.4;
         ctx.beginPath();
-        ctx.roundRect(obs.x, obs.y, obs.w, 12, 4);
+        ctx.roundRect(obs.x, obs.y, obs.w, 11, 4);
         ctx.fill();
-        ctx.stroke();
-
-        ctx.fillStyle = pal.textBright;
-        ctx.fillRect(obs.x + 7, obs.y + 2, 5, 8);
-        ctx.fillRect(obs.x + 19, obs.y + 2, 5, 8);
       } else if (obs.type === 'pillar') {
-        const pGrad = ctx.createLinearGradient(obs.x, obs.y, obs.x + obs.w, obs.y + obs.h);
-        pGrad.addColorStop(0, pal.isLight ? '#e2ddd0' : '#334155');
-        pGrad.addColorStop(1, pal.isLight ? '#cbc4b2' : '#0f172a');
-        ctx.fillStyle = pGrad;
+        ctx.fillStyle = pal.isLight ? '#d5cebe' : '#1e293b';
         ctx.strokeStyle = pal.pillar;
-        ctx.lineWidth = 1.8;
+        ctx.lineWidth = 1.6;
         ctx.beginPath();
         ctx.roundRect(obs.x, obs.y, obs.w, obs.h, 6);
         ctx.fill();
         ctx.stroke();
-
-        ctx.strokeStyle = pal.pillar;
-        ctx.globalAlpha = 0.45;
-        ctx.lineWidth = 1.2;
-        for (let by = obs.y + 12; by < obs.y + obs.h - 8; by += 14) {
-          ctx.beginPath();
-          ctx.moveTo(obs.x + 5, by);
-          ctx.lineTo(obs.x + obs.w - 5, by);
-          ctx.stroke();
-        }
       } else {
         const cx = obs.x + obs.w * 0.5;
         const cy = obs.y + obs.h * 0.5;
         const hoverBob = Math.sin(this.visualTime * 9 + obs.x * 0.03) * 2.5;
 
-        const beamGrad = ctx.createLinearGradient(cx, cy + hoverBob, cx - 18, r.groundY);
-        beamGrad.addColorStop(
-          0,
-          pal.isLight ? 'rgba(0, 150, 164, 0.18)' : 'rgba(125, 211, 252, 0.2)'
-        );
+        const beamGrad = ctx.createLinearGradient(cx, cy + hoverBob, cx - 16, r.groundY);
+        beamGrad.addColorStop(0, pal.isLight ? 'rgba(0, 150, 164, 0.16)' : 'rgba(125, 211, 252, 0.18)');
         beamGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
         ctx.fillStyle = beamGrad;
         ctx.beginPath();
-        ctx.moveTo(cx - 6, cy + hoverBob + 6);
-        ctx.lineTo(cx + 6, cy + hoverBob + 6);
-        ctx.lineTo(cx + 22, r.groundY);
-        ctx.lineTo(cx - 34, r.groundY);
+        ctx.moveTo(cx - 5, cy + hoverBob + 6);
+        ctx.lineTo(cx + 5, cy + hoverBob + 6);
+        ctx.lineTo(cx + 20, r.groundY);
+        ctx.lineTo(cx - 30, r.groundY);
         ctx.closePath();
         ctx.fill();
 
@@ -1152,7 +949,7 @@ export class CadenceArcade {
         ctx.lineTo(obs.x + obs.w - 8 + rotorW * 0.5, cy + hoverBob - 9);
         ctx.stroke();
 
-        ctx.fillStyle = pal.isLight ? '#ffffff' : '#1e293b';
+        ctx.fillStyle = pal.isLight ? '#ffffff' : '#0f172a';
         ctx.strokeStyle = pal.drone;
         ctx.lineWidth = 1.8;
         ctx.beginPath();
@@ -1162,13 +959,13 @@ export class CadenceArcade {
 
         ctx.fillStyle = pal.warm;
         ctx.beginPath();
-        ctx.arc(cx - 4, cy + hoverBob, 3.2, 0, Math.PI * 2);
+        ctx.arc(cx - 4, cy + hoverBob, 3, 0, Math.PI * 2);
         ctx.fill();
       }
       ctx.restore();
     });
 
-    // 7. Expanding Rings & Acoustic Pulse Wave
+    // 7. Expanding Rings & J-Key Acoustic Shockwave
     r.rings.forEach((rg) => {
       ctx.save();
       ctx.strokeStyle = pal.accent;
@@ -1198,7 +995,7 @@ export class CadenceArcade {
       ctx.restore();
     });
 
-    // 8. Articulated Runner with Theme-Colored Scarf & Shoes
+    // 8. Articulated Runner
     this.drawArticulatedRunner(ctx, r.player, r.groundY, pal);
 
     // 9. Particles
@@ -1212,341 +1009,64 @@ export class CadenceArcade {
     ctx.globalAlpha = 1;
 
     if (r.state === 'tutorial') {
-      this.drawRunnerTutorialCard(ctx, W, H, pal);
-    }
-
-    if (r.state === 'gameover') {
-      this.drawGameOverOverlay(ctx, W, H, pal, {
-        badge: pal.isLight ? 'SHIMLA DAYLIGHT RUN' : 'SHIMLA DUSK RUN',
-        title: 'Run Complete',
-        summary: `${Math.floor(r.score)} pts   ·   ${r.distanceKm.toFixed(2)} km   ·   Best ${this.hiScores.runner}`,
+      this.drawMinimalOverlay(ctx, W, H, pal, {
+        title: 'Night Run',
+        chips: ['Jump', 'Duck', 'J · Pulse Drone'],
+        cta: 'Start Run →',
+      });
+    } else if (r.state === 'gameover') {
+      this.drawMinimalOverlay(ctx, W, H, pal, {
+        title: `${Math.floor(r.score)} pts · ${r.distanceKm.toFixed(2)} km`,
+        chips: [`Best ${this.hiScores.runner} pts`],
+        cta: 'Play Again ↻',
       });
     }
   }
 
-  drawKeycap(ctx, x, y, w, h, label, accent, pal) {
+  drawMinimalOverlay(ctx, W, H, pal, { title, chips = [], cta }) {
     ctx.save();
-    ctx.fillStyle = pal?.isLight ? 'rgba(3, 18, 17, 0.22)' : '#050811';
-    ctx.beginPath();
-    ctx.roundRect(x, y + 3, w, h, 7);
-    ctx.fill();
-
-    const capGrad = ctx.createLinearGradient(x, y, x, y + h);
-    capGrad.addColorStop(0, pal?.isLight ? '#ffffff' : '#243046');
-    capGrad.addColorStop(1, pal?.isLight ? '#f2efe4' : '#162032');
-    ctx.fillStyle = capGrad;
-    ctx.strokeStyle = pal?.isLight ? 'rgba(3, 18, 17, 0.18)' : 'rgba(248, 250, 252, 0.22)';
-    ctx.lineWidth = 1.2;
-    ctx.beginPath();
-    ctx.roundRect(x, y, w, h, 7);
-    ctx.fill();
-    ctx.stroke();
-
-    ctx.fillStyle = accent;
-    ctx.font = '700 11.5px "JetBrains Mono", monospace';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(label, x + w / 2, y + h / 2 + 0.5);
-    ctx.restore();
-  }
-
-  drawRunnerTutorialCard(ctx, W, H, pal = this.getThemePalette()) {
-    ctx.save();
-    ctx.fillStyle = pal.isLight ? 'rgba(247, 245, 238, 0.68)' : 'rgba(4, 7, 15, 0.68)';
+    ctx.fillStyle = pal.isLight ? 'rgba(247, 245, 238, 0.62)' : 'rgba(2, 4, 10, 0.62)';
     ctx.fillRect(0, 0, W, H);
 
-    const cardW = 630;
-    const cardH = 262;
-    const cardX = Math.round((W - cardW) / 2);
-    const cardY = Math.round((H - cardH) / 2);
-
-    const cardGrad = ctx.createLinearGradient(cardX, cardY, cardX, cardY + cardH);
-    cardGrad.addColorStop(0, pal.cardBg[0]);
-    cardGrad.addColorStop(1, pal.cardBg[1]);
-    ctx.fillStyle = cardGrad;
-    ctx.strokeStyle = pal.cardBorder;
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.roundRect(cardX, cardY, cardW, cardH, 16);
-    ctx.fill();
-    ctx.stroke();
-
-    ctx.textAlign = 'center';
-
-    ctx.fillStyle = pal.accent;
-    ctx.font = '600 10px "JetBrains Mono", monospace';
-    ctx.fillText('SHIMLA ROAD TRACK  ·  5K & 10K RUNNER', W / 2, cardY + 28);
-
-    ctx.fillStyle = pal.textBright;
-    ctx.font = '700 22px "Space Grotesk", -apple-system, sans-serif';
-    ctx.fillText('Night Run Controls', W / 2, cardY + 54);
-
-    const items = [
-      {
-        key: 'Space / ↑',
-        title: 'Jump & Double Jump',
-        sub: 'Clear track hurdles & pillars',
-        accent: pal.hurdle,
-        type: 'hurdle',
-      },
-      {
-        key: '↓ / S',
-        title: 'Fast Duck',
-        sub: 'Slide underneath high drones',
-        accent: pal.drone,
-        type: 'duck',
-      },
-      {
-        key: 'J',
-        title: 'Snare Pulse',
-        sub: 'Shatter drones in your path',
-        accent: pal.accent,
-        type: 'pulse',
-      },
-    ];
-
-    const boxW = 182;
-    const boxH = 122;
-    const gap = 18;
-    const startX = cardX + (cardW - (boxW * 3 + gap * 2)) / 2;
-    const boxY = cardY + 72;
-
-    items.forEach((it, idx) => {
-      const bx = startX + idx * (boxW + gap);
-
-      ctx.fillStyle = pal.boxBg;
-      ctx.strokeStyle = pal.boxBorder;
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.roundRect(bx, boxY, boxW, boxH, 12);
-      ctx.fill();
-      ctx.stroke();
-
-      const cx = bx + boxW / 2;
-      const iy = boxY + 26;
-      ctx.save();
-      if (it.type === 'hurdle') {
-        ctx.strokeStyle = pal.hurdle;
-        ctx.setLineDash([3, 3]);
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.arc(cx, iy + 8, 16, Math.PI, 0);
-        ctx.stroke();
-        ctx.setLineDash([]);
-
-        ctx.fillStyle = pal.hurdle;
-        ctx.beginPath();
-        ctx.roundRect(cx - 9, iy - 1, 18, 7, 2);
-        ctx.fill();
-      } else if (it.type === 'duck') {
-        ctx.fillStyle = pal.isLight ? '#ffffff' : '#1e293b';
-        ctx.strokeStyle = pal.drone;
-        ctx.lineWidth = 1.6;
-        ctx.beginPath();
-        ctx.roundRect(cx - 14, iy - 8, 28, 9, 4);
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.strokeStyle = pal.textBright;
-        ctx.lineWidth = 1.8;
-        ctx.beginPath();
-        ctx.moveTo(cx, iy + 4);
-        ctx.lineTo(cx, iy + 13);
-        ctx.moveTo(cx - 4, iy + 9);
-        ctx.lineTo(cx, iy + 13);
-        ctx.lineTo(cx + 4, iy + 9);
-        ctx.stroke();
-      } else {
-        ctx.fillStyle = pal.accent;
-        ctx.beginPath();
-        ctx.arc(cx - 10, iy + 2, 3.5, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.strokeStyle = pal.accent;
-        ctx.lineWidth = 1.8;
-        ctx.beginPath();
-        ctx.arc(cx - 10, iy + 2, 11, -0.65, 0.65);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.arc(cx - 10, iy + 2, 19, -0.55, 0.55);
-        ctx.stroke();
-      }
-      ctx.restore();
-
-      const kw = idx === 2 ? 54 : 88;
-      this.drawKeycap(ctx, cx - kw / 2, boxY + 46, kw, 26, it.key, it.accent, pal);
-
-      ctx.fillStyle = pal.textBright;
-      ctx.font = '600 12.5px "Space Grotesk", -apple-system, sans-serif';
-      ctx.fillText(it.title, cx, boxY + 92);
-
-      ctx.fillStyle = pal.textMuted;
-      ctx.font = '400 11px "Space Grotesk", -apple-system, sans-serif';
-      ctx.fillText(it.sub, cx, boxY + 109);
-    });
-
-    const pillW = 248;
-    const pillH = 34;
-    const pillX = (W - pillW) / 2;
-    const pillY = cardY + cardH - 48;
-
-    ctx.fillStyle = pal.accent;
-    ctx.beginPath();
-    ctx.roundRect(pillX, pillY, pillW, pillH, 999);
-    ctx.fill();
-
-    ctx.fillStyle = pal.ctaText;
-    ctx.font = '700 12.5px "Space Grotesk", -apple-system, sans-serif';
-    ctx.fillText('Press Space or Click to Run  →', W / 2, pillY + 21);
-
-    ctx.restore();
-  }
-
-  drawRhythmTutorialCard(ctx, W, H, pal = this.getThemePalette()) {
-    ctx.save();
-    ctx.fillStyle = pal.isLight ? 'rgba(247, 245, 238, 0.68)' : 'rgba(4, 7, 15, 0.68)';
-    ctx.fillRect(0, 0, W, H);
-
-    const cardW = 630;
-    const cardH = 262;
-    const cardX = Math.round((W - cardW) / 2);
-    const cardY = Math.round((H - cardH) / 2);
-
-    const cardGrad = ctx.createLinearGradient(cardX, cardY, cardX, cardY + cardH);
-    cardGrad.addColorStop(0, pal.cardBg[0]);
-    cardGrad.addColorStop(1, pal.cardBg[1]);
-    ctx.fillStyle = cardGrad;
-    ctx.strokeStyle = pal.cardBorder;
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.roundRect(cardX, cardY, cardW, cardH, 16);
-    ctx.fill();
-    ctx.stroke();
-
-    ctx.textAlign = 'center';
-
-    ctx.fillStyle = pal.accent;
-    ctx.font = '600 10px "JetBrains Mono", monospace';
-    ctx.fillText('TAMA JAM SESSION  ·  3-LANE STUDIO DECK', W / 2, cardY + 28);
-
-    ctx.fillStyle = pal.textBright;
-    ctx.font = '700 22px "Space Grotesk", -apple-system, sans-serif';
-    ctx.fillText('Drum Pad Controls', W / 2, cardY + 54);
-
-    const items = [
-      {
-        key: 'Space',
-        title: 'Bass Kick',
-        sub: 'Left lane · Low punch',
-        accent: pal.laneColors[0],
-      },
-      {
-        key: 'J',
-        title: 'Snare / Rim',
-        sub: 'Center lane · Crisp crack',
-        accent: pal.laneColors[1],
-      },
-      {
-        key: 'K',
-        title: 'Hi-Hat',
-        sub: 'Right lane · Groove pulse',
-        accent: pal.laneColors[2],
-      },
-    ];
-
-    const boxW = 182;
-    const boxH = 122;
-    const gap = 18;
-    const startX = cardX + (cardW - (boxW * 3 + gap * 2)) / 2;
-    const boxY = cardY + 72;
-
-    items.forEach((it, idx) => {
-      const bx = startX + idx * (boxW + gap);
-      const cx = bx + boxW / 2;
-
-      ctx.fillStyle = pal.boxBg;
-      ctx.strokeStyle = pal.boxBorder;
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.roundRect(bx, boxY, boxW, boxH, 12);
-      ctx.fill();
-      ctx.stroke();
-
-      ctx.fillStyle = it.accent;
-      ctx.beginPath();
-      ctx.roundRect(cx - 18, boxY + 20, 36, 10, 4);
-      ctx.fill();
-
-      const kw = idx === 0 ? 76 : 54;
-      this.drawKeycap(ctx, cx - kw / 2, boxY + 44, kw, 26, it.key, it.accent, pal);
-
-      ctx.fillStyle = pal.textBright;
-      ctx.font = '600 12.5px "Space Grotesk", -apple-system, sans-serif';
-      ctx.fillText(it.title, cx, boxY + 92);
-
-      ctx.fillStyle = pal.textMuted;
-      ctx.font = '400 11px "Space Grotesk", -apple-system, sans-serif';
-      ctx.fillText(it.sub, cx, boxY + 109);
-    });
-
-    const pillW = 256;
-    const pillH = 34;
-    const pillX = (W - pillW) / 2;
-    const pillY = cardY + cardH - 48;
-
-    ctx.fillStyle = pal.accent;
-    ctx.beginPath();
-    ctx.roundRect(pillX, pillY, pillW, pillH, 999);
-    ctx.fill();
-
-    ctx.fillStyle = pal.ctaText;
-    ctx.font = '700 12.5px "Space Grotesk", -apple-system, sans-serif';
-    ctx.fillText('Press Space or Click to Jam  →', W / 2, pillY + 21);
-
-    ctx.restore();
-  }
-
-  drawGameOverOverlay(ctx, W, H, pal, { badge, title, summary }) {
-    ctx.save();
-    ctx.fillStyle = pal.isLight ? 'rgba(247, 245, 238, 0.72)' : 'rgba(4, 7, 15, 0.72)';
-    ctx.fillRect(0, 0, W, H);
-
-    const cardW = 460;
-    const cardH = 188;
+    const cardW = Math.min(W - 32, 360);
+    const cardH = 164;
     const cardX = Math.round((W - cardW) / 2);
     const cardY = Math.round((H - cardH) / 2);
 
     ctx.fillStyle = pal.cardBg[0];
     ctx.strokeStyle = pal.cardBorder;
-    ctx.lineWidth = 1.5;
+    ctx.lineWidth = 1.2;
     ctx.beginPath();
     ctx.roundRect(cardX, cardY, cardW, cardH, 16);
     ctx.fill();
     ctx.stroke();
 
     ctx.textAlign = 'center';
-    ctx.fillStyle = pal.accent;
-    ctx.font = '600 10px "JetBrains Mono", monospace';
-    ctx.fillText(badge, W / 2, cardY + 34);
-
     ctx.fillStyle = pal.textBright;
     ctx.font = '700 22px "Space Grotesk", -apple-system, sans-serif';
-    ctx.fillText(title, W / 2, cardY + 66);
+    ctx.fillText(title, W / 2, cardY + 42);
 
-    ctx.fillStyle = pal.textMuted;
-    ctx.font = '500 12.5px "JetBrains Mono", monospace';
-    ctx.fillText(summary, W / 2, cardY + 98);
+    // Minimal control chips row
+    if (chips.length > 0) {
+      ctx.font = '600 11px "JetBrains Mono", monospace';
+      const chipText = chips.join('   ·   ');
+      ctx.fillStyle = pal.textMuted;
+      ctx.fillText(chipText, W / 2, cardY + 76);
+    }
 
-    const pillW = 236;
-    const pillH = 34;
+    const pillW = 164;
+    const pillH = 36;
+    const pillX = Math.round((W - pillW) / 2);
+    const pillY = cardY + cardH - 52;
+
     ctx.fillStyle = pal.accent;
     ctx.beginPath();
-    ctx.roundRect((W - pillW) / 2, cardY + 126, pillW, pillH, 999);
+    ctx.roundRect(pillX, pillY, pillW, pillH, 999);
     ctx.fill();
 
     ctx.fillStyle = pal.ctaText;
-    ctx.font = '700 12px "Space Grotesk", -apple-system, sans-serif';
-    ctx.fillText('Press Space or Click to Replay', W / 2, cardY + 147);
+    ctx.font = '700 12.5px "Space Grotesk", -apple-system, sans-serif';
+    ctx.fillText(cta, W / 2, pillY + 23);
     ctx.restore();
   }
 
@@ -1558,6 +1078,12 @@ export class CadenceArcade {
     const crouch = p.crouching;
     const phase = p.phase;
 
+    if (p.flipAngle > 0) {
+      ctx.translate(x, y - 24);
+      ctx.rotate(p.flipAngle);
+      ctx.translate(-x, -(y - 24));
+    }
+
     const heightRatio = Math.max(0.2, 1 - (groundY - y) / 160);
     ctx.fillStyle = pal.isLight
       ? `rgba(3, 18, 17, ${0.22 * heightRatio})`
@@ -1566,7 +1092,6 @@ export class CadenceArcade {
     ctx.ellipse(x, groundY + 3, 17 * heightRatio, 3.8 * heightRatio, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // Flowing wind scarf behind runner
     if (p.scarfPts && p.scarfPts.length > 1) {
       ctx.save();
       ctx.strokeStyle = pal.scarf;
@@ -1665,45 +1190,16 @@ export class CadenceArcade {
     ctx.restore();
   }
 
+  getLaneX(lane) {
+    const span = Math.min(this.W - 110, 420);
+    const startX = (this.W - span) / 2;
+    return startX + lane * (span / 2);
+  }
+
   updateRhythm(dt) {
     const rh = this.rhythm;
-    if (rh.state !== 'playing') return;
-
-    rh.songTime += dt;
-    const stepDuration = 60 / rh.bpm / 2;
-
-    const travelTime = 1.18;
-    while (rh.nextBeatIndex * stepDuration < rh.songTime + travelTime) {
-      const step = rh.nextBeatIndex % 16;
-      const targetTime = rh.nextBeatIndex * stepDuration;
-
-      if (step === 0 || step === 6 || step === 10 || (step === 14 && Math.random() > 0.4)) {
-        rh.notes.push({ lane: 0, targetTime, hit: false, missed: false });
-      }
-      if (step === 4 || step === 12 || (step === 9 && Math.random() > 0.35)) {
-        rh.notes.push({ lane: 1, targetTime, hit: false, missed: false });
-      }
-      if (step % 2 === 0 || step === 7 || step === 15) {
-        rh.notes.push({ lane: 2, targetTime, hit: false, missed: false });
-      }
-
-      rh.nextBeatIndex += 1;
-    }
-
     for (let i = 0; i < 3; i += 1) {
       rh.laneFlashes[i] = Math.max(0, rh.laneFlashes[i] - dt * 4.5);
-    }
-
-    for (let i = rh.notes.length - 1; i >= 0; i -= 1) {
-      const note = rh.notes[i];
-      if (!note.hit && !note.missed && rh.songTime - note.targetTime > 0.16) {
-        note.missed = true;
-        rh.combo = 0;
-        rh.misses += 1;
-      }
-      if (rh.songTime - note.targetTime > 0.35 || note.hit) {
-        rh.notes.splice(i, 1);
-      }
     }
 
     for (let i = rh.hitRipples.length - 1; i >= 0; i -= 1) {
@@ -1724,6 +1220,41 @@ export class CadenceArcade {
       pt.y += pt.vy * dt;
       pt.life -= dt;
       if (pt.life <= 0) rh.particles.splice(i, 1);
+    }
+
+    if (rh.state !== 'playing') return;
+
+    rh.songTime += dt;
+    const stepDuration = 60 / rh.bpm / 2;
+    const travelTime = 1.18;
+
+    while (rh.nextBeatIndex * stepDuration < rh.songTime + travelTime) {
+      const step = rh.nextBeatIndex % 16;
+      const targetTime = rh.nextBeatIndex * stepDuration;
+
+      if (step === 0 || step === 6 || step === 10 || (step === 14 && Math.random() > 0.4)) {
+        rh.notes.push({ lane: 0, targetTime, hit: false, missed: false });
+      }
+      if (step === 4 || step === 12 || (step === 9 && Math.random() > 0.35)) {
+        rh.notes.push({ lane: 1, targetTime, hit: false, missed: false });
+      }
+      if (step % 2 === 0 || step === 7 || step === 15) {
+        rh.notes.push({ lane: 2, targetTime, hit: false, missed: false });
+      }
+
+      rh.nextBeatIndex += 1;
+    }
+
+    for (let i = rh.notes.length - 1; i >= 0; i -= 1) {
+      const note = rh.notes[i];
+      if (!note.hit && !note.missed && rh.songTime - note.targetTime > 0.16) {
+        note.missed = true;
+        rh.combo = 0;
+        rh.misses += 1;
+      }
+      if (rh.songTime - note.targetTime > 0.35 || note.hit) {
+        rh.notes.splice(i, 1);
+      }
     }
   }
 
@@ -1747,7 +1278,7 @@ export class CadenceArcade {
       }
     }
 
-    const laneX = 210 + lane * 200;
+    const laneX = this.getLaneX(lane);
     const hitY = 308;
     const pal = this.getThemePalette();
     const laneColors = pal.laneColors;
@@ -1805,9 +1336,9 @@ export class CadenceArcade {
     ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, W, H);
 
-    // Theme-reactive studio EQ spectrum along top horizon
-    const bars = 36;
-    const barSpan = 540;
+    // Subtle EQ spectrum along top
+    const bars = 28;
+    const barSpan = Math.min(W - 60, 460);
     const startBarX = (W - barSpan) / 2;
     for (let b = 0; b < bars; b += 1) {
       const bx = startBarX + b * (barSpan / bars);
@@ -1815,59 +1346,45 @@ export class CadenceArcade {
         Math.sin(this.visualTime * 6 + b * 0.45) * 0.5 +
         0.5 +
         (rh.laneFlashes[b % 3] || 0) * 0.8;
-      const bh = 6 + wave * 18;
+      const bh = 5 + wave * 16;
       ctx.fillStyle = pal.accent;
-      ctx.globalAlpha = 0.16;
-      ctx.fillRect(bx, 38 - bh, 8, bh);
+      ctx.globalAlpha = 0.15;
+      ctx.fillRect(bx, 34 - bh, 6, bh);
     }
     ctx.globalAlpha = 1;
 
     const laneColors = pal.laneColors;
-    const laneLabels = ['Space · Kick', 'J · Snare', 'K · Hi-Hat'];
+    const laneLabels = ['Kick', 'Snare', 'Hat'];
     const hitY = 308;
     const topY = 44;
     const travelTime = 1.18;
 
     for (let i = 0; i < 3; i += 1) {
-      const lx = 210 + i * 200;
+      const lx = this.getLaneX(i);
       const flash = rh.laneFlashes[i];
 
-      const laneGrad = ctx.createLinearGradient(lx, topY, lx, hitY);
-      laneGrad.addColorStop(0, pal.isLight ? 'rgba(3, 18, 17, 0.04)' : 'rgba(15, 23, 42, 0.28)');
-      laneGrad.addColorStop(1, pal.isLight ? 'rgba(3, 18, 17, 0.1)' : 'rgba(30, 41, 59, 0.68)');
-      ctx.fillStyle = laneGrad;
+      ctx.fillStyle = pal.isLight ? 'rgba(3, 18, 17, 0.05)' : 'rgba(15, 23, 42, 0.42)';
       ctx.strokeStyle = pal.boxBorder;
       ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.roundRect(lx - 48, topY, 96, hitY - topY + 18, 12);
+      ctx.roundRect(lx - 46, topY, 92, hitY - topY + 18, 12);
       ctx.fill();
-      ctx.stroke();
-
-      ctx.strokeStyle = pal.isLight ? 'rgba(3, 18, 17, 0.12)' : 'rgba(148, 163, 184, 0.14)';
-      ctx.beginPath();
-      ctx.moveTo(lx, topY + 8);
-      ctx.lineTo(lx, hitY - 12);
       ctx.stroke();
 
       const padPressOffset = flash * 3;
       ctx.save();
-      ctx.fillStyle = pal.isLight ? 'rgba(3, 18, 17, 0.25)' : '#050811';
-      ctx.beginPath();
-      ctx.roundRect(lx - 40, hitY - 10, 80, 26, 8);
-      ctx.fill();
-
       ctx.fillStyle = flash > 0.05 ? laneColors[i] : pal.isLight ? '#ffffff' : '#1e293b';
       ctx.strokeStyle = laneColors[i];
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.roundRect(lx - 40, hitY - 13 + padPressOffset, 80, 24, 8);
+      ctx.roundRect(lx - 38, hitY - 12 + padPressOffset, 76, 24, 8);
       ctx.fill();
       ctx.stroke();
 
-      ctx.fillStyle = pal.textBright;
-      ctx.font = '600 11.5px "Space Grotesk", -apple-system, sans-serif';
+      ctx.fillStyle = pal.textMuted;
+      ctx.font = '600 11px "Space Grotesk", -apple-system, sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(laneLabels[i], lx, hitY + 32);
+      ctx.fillText(laneLabels[i], lx, hitY + 30);
       ctx.restore();
     }
 
@@ -1877,28 +1394,14 @@ export class CadenceArcade {
       const progress = 1 - timeRemaining / travelTime;
       if (progress < -0.05 || progress > 1.12) return;
 
-      const lx = 210 + note.lane * 200;
+      const lx = this.getLaneX(note.lane);
       const ny = topY + progress * (hitY - topY);
       const color = laneColors[note.lane];
 
       ctx.save();
-      const trailGrad = ctx.createLinearGradient(lx, ny - 28, lx, ny);
-      trailGrad.addColorStop(0, 'rgba(255, 255, 255, 0)');
-      trailGrad.addColorStop(
-        1,
-        pal.isLight ? 'rgba(3, 18, 17, 0.12)' : 'rgba(248, 250, 252, 0.16)'
-      );
-      ctx.fillStyle = trailGrad;
-      ctx.fillRect(lx - 26, ny - 28, 52, 28);
-
-      ctx.fillStyle = pal.isLight ? 'rgba(3, 18, 17, 0.22)' : '#050811';
-      ctx.beginPath();
-      ctx.roundRect(lx - 30, ny - 5, 60, 15, 6);
-      ctx.fill();
-
       ctx.fillStyle = color;
       ctx.beginPath();
-      ctx.roundRect(lx - 30, ny - 8, 60, 14, 6);
+      ctx.roundRect(lx - 28, ny - 7, 56, 14, 6);
       ctx.fill();
       ctx.restore();
     });
@@ -1920,7 +1423,7 @@ export class CadenceArcade {
       ctx.fillStyle = rh.feedback.color;
       ctx.font = '700 12px "JetBrains Mono", monospace';
       ctx.textAlign = 'center';
-      ctx.fillText(rh.feedback.text, W / 2, 26);
+      ctx.fillText(rh.feedback.text, W / 2, 24);
       ctx.restore();
     }
 
@@ -1934,7 +1437,11 @@ export class CadenceArcade {
     ctx.globalAlpha = 1;
 
     if (rh.state === 'tutorial') {
-      this.drawRhythmTutorialCard(ctx, W, H, pal);
+      this.drawMinimalOverlay(ctx, W, H, pal, {
+        title: 'Drum Pad',
+        chips: ['Kick', 'Snare', 'Hat'],
+        cta: 'Start Jam →',
+      });
     }
   }
 

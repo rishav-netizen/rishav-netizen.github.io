@@ -503,9 +503,9 @@ export class HeroDrumKitStage {
       const s3 = seeded(i * 11 + 3);
       const s4 = seeded(i * 17 + 5);
 
-      // Phase 0: Gargantua-style Relativistic Accretion Disk + Lensed Einstein Ring
-      const isPhotonRing = i < 480;
-      const isLensedArch = !isPhotonRing && i < 880;
+      // Phase 0: Relativistic Accretion Disk + Photon Ring + Polar Jets
+      const isPhotonRing = i < 420;
+      const isPolarJet = !isPhotonRing && i < 640;
       const orbitAngle = s1 * Math.PI * 2;
       let diskR;
       let sx;
@@ -514,62 +514,62 @@ export class HeroDrumKitStage {
       let orbitSpeed;
 
       if (isPhotonRing) {
-        diskR = 58 + (s2 - 0.5) * 7;
-        orbitSpeed = 2.4 + s3 * 0.7;
+        diskR = 54 + (s2 - 0.5) * 9;
+        orbitSpeed = 2.6 + s3 * 0.8;
         sx = Math.cos(orbitAngle) * diskR;
-        sy = Math.sin(orbitAngle) * diskR * 0.92;
-        sz = Math.sin(orbitAngle * 2) * 14;
-      } else if (isLensedArch) {
-        // Gravitationally lensed upper & lower photon arches bending around the shadow
-        const archSign = i % 2 === 0 ? 1 : -1;
-        diskR = 64 + Math.pow(s2, 1.3) * 125;
-        orbitSpeed = 1.9 + s3 * 0.5;
-        sx = Math.cos(orbitAngle) * diskR;
-        sy = archSign * Math.abs(Math.sin(orbitAngle)) * (56 + s3 * 42) + (s4 - 0.5) * 8;
-        sz = Math.sin(orbitAngle) * diskR * 0.35;
+        sy = Math.sin(orbitAngle) * diskR * 0.88;
+        sz = Math.sin(orbitAngle * 2) * 18;
+      } else if (isPolarJet) {
+        const jetSign = i % 2 === 0 ? 1 : -1;
+        const jetDist = 25 + s2 * 210;
+        const coneSpread = (4 + jetDist * 0.14) * Math.sqrt(s3);
+        orbitSpeed = 3.2;
+        sx = Math.cos(orbitAngle) * coneSpread + jetDist * 0.22 * jetSign;
+        sy = jetSign * jetDist;
+        sz = Math.sin(orbitAngle) * coneSpread;
       } else {
-        // Thin, luminous Keplerian spiral accretion disk tilted at 15 degrees
-        diskR = 66 + Math.pow(s2, 1.5) * 260;
-        orbitSpeed = 135 / Math.pow(diskR, 0.72);
-        const armSpiral = (i % 2) * Math.PI + Math.log(diskR / 58) * 1.65;
-        const thickness = (s3 - 0.5) * (3.5 + diskR * 0.032);
+        diskR = 58 + Math.pow(s2, 1.45) * 265;
+        orbitSpeed = 145 / Math.pow(diskR, 0.72);
+        const armSpiral = (i % 3) * ((Math.PI * 2) / 3) + diskR * 0.012;
+        const thickness = (s3 - 0.5) * (6 + diskR * 0.06);
         const rawX = Math.cos(orbitAngle + armSpiral) * diskR;
         const rawZ = Math.sin(orbitAngle + armSpiral) * diskR;
-        const tilt = 0.27;
+        const tilt = 0.38;
         sx = rawX;
         sy = thickness * Math.cos(tilt) - rawZ * Math.sin(tilt);
         sz = rawZ * Math.cos(tilt) + thickness * Math.sin(tilt);
       }
 
-      // Phase 1: Lorenz Strange Attractor
+      // Phase 1: Lorenz Strange Attractor + Chladni Cymatics Resonance Node
       const lor = lorenzPts[i];
 
-      // Phase 2: Radial Fibonacci Cymatics Harmonic Mandala (frames RISHAV KUMAR cleanly without a rectangular box)
-      const goldenAngle = i * 2.399963229728653;
-      const radialNorm = Math.sqrt((i + 0.5) / TOTAL);
-      const mandalaR = 36 + radialNorm * 235;
-      const harmonicWave =
-        Math.cos(6 * goldenAngle) * Math.sin(radialNorm * Math.PI * 3) * 28 +
-        Math.cos(radialNorm * Math.PI * 5) * 18;
-      const px = Math.cos(goldenAngle) * mandalaR;
-      const py = Math.sin(goldenAngle) * (mandalaR * 0.72);
-      const pz = harmonicWave;
-      const lum = clamp(0.45 + 0.55 * Math.cos(radialNorm * Math.PI * 4 + Math.cos(3 * goldenAngle)), 0.25, 1);
+      // Phase 2: Procedural fallback LiDAR grid until portrait image decodes
+      const gridCols = 60;
+      const gridRows = 40;
+      const col = i % gridCols;
+      const row = Math.floor(i / gridCols) % gridRows;
+      const u = col / (gridCols - 1) - 0.5;
+      const v = row / (gridRows - 1) - 0.5;
+      const rad = Math.hypot(u, v);
+      const synthElev = Math.exp(-rad * rad * 6) * 85;
+      const px = u * 310;
+      const py = v * 220;
+      const pz = synthElev - 20;
 
       this.particles.push({
         index: i,
         drumType: drumTypes[i % 3],
         tone: tones[i % 3],
         isPhotonRing,
-        isPolarJet: false,
+        isPolarJet,
         orbitAngle,
-        diskR: diskR || 64,
+        diskR: diskR || 60,
         orbitSpeed,
         scattered: { x: sx, y: sy, z: sz },
         kit: { x: lor.x, y: lor.y, z: lor.z },
-        portrait: { x: px, y: py, z: pz, lum, row: Math.floor(i / 60), col: i % 60 },
+        portrait: { x: px, y: py, z: pz, lum: clamp(synthElev / 85, 0.25, 1), row, col },
         isPortraitNode: true,
-        size: isPhotonRing ? 1.45 + s4 * 1.25 : 1.05 + s4 * 1.65,
+        size: isPhotonRing ? 1.5 + s4 * 1.4 : 1.1 + s4 * 1.8,
         phase: s1 * Math.PI * 2,
         spinSign: s2 > 0.3 ? 1 : -1,
         curlX: 0,
@@ -612,10 +612,16 @@ export class HeroDrumKitStage {
         const c = i % gridW;
         const idx = (r * gridW + c) * 4;
         const rawLum = (data[idx] * 0.2126 + data[idx + 1] * 0.7152 + data[idx + 2] * 0.0722) / 255;
-        const contrasted = clamp((rawLum - 0.12) * 1.35, 0.22, 1);
-        pt.portrait.z = pt.portrait.z * 0.65 + (contrasted - 0.5) * 54;
-        pt.portrait.lum = clamp(pt.portrait.lum * 0.5 + contrasted * 0.5, 0.28, 1);
-        pt.isPortraitNode = true;
+        const contrasted = clamp((rawLum - 0.12) * 1.35, 0.08, 1);
+        pt.portrait = {
+          x: (c / (gridW - 1) - 0.5) * 320,
+          y: (r / (gridH - 1) - 0.5) * 235,
+          z: contrasted * 95 - 35,
+          lum: contrasted,
+          row: r,
+          col: c,
+        };
+        pt.isPortraitNode = contrasted > 0.16;
       });
     } catch {
       // Procedural fallback remains active
@@ -914,7 +920,10 @@ export class HeroDrumKitStage {
       // Relativistic Doppler beaming: approaching side (x1 < 0) glows bright cyan/white, receding side glows violet
       const dopplerShift = clamp(-x1 / 140, -1, 1);
       const lumBoost = lerp(0.78, pt.portrait.lum, flipT);
-      const alpha = clamp(scale * 0.68 * lumBoost + chladniEnergy * 0.18, 0.1, 0.96);
+      // Softly dim center particles behind RISHAV KUMAR when revealed so the name commands 100% contrast
+      const centerDistNorm = Math.hypot((screenX - centerX) / (this.width * 0.34), (screenY - centerY) / (this.height * 0.24));
+      const textStageClearance = flipT > 0.1 ? lerp(1, clamp(0.32 + centerDistNorm * 0.68, 0.32, 1), flipT) : 1;
+      const alpha = clamp((scale * 0.68 * lumBoost + chladniEnergy * 0.18) * textStageClearance, 0.08, 0.92);
       const radius = clamp(pt.size * scale * (pt.isPhotonRing ? 0.95 : 0.76), 0.8, 4.2);
 
       let color;

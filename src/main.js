@@ -1235,6 +1235,12 @@ const heroCharStates = [];
         trx: 0,
         try: 0,
         tglow: 0,
+        revX: 0,
+        revY: 0,
+        revZ: 0,
+        revRx: 0,
+        revRy: 0,
+        revScale: 1,
       });
       globalIdx += 1;
     });
@@ -1242,6 +1248,10 @@ const heroCharStates = [];
 })();
 
 let smoothScrollWarp = 0;
+let stageTiltRx = 0;
+let stageTiltRy = 0;
+const heroMonumentalNameEl = $('#hero-name');
+
 function renderKineticTypography() {
   // 1. Scroll-velocity chromatic warp on section headings
   const rawVelocity = lenis ? scrollState.velocity : 0;
@@ -1251,10 +1261,26 @@ function renderKineticTypography() {
   document.documentElement.style.setProperty('--scroll-warp', smoothScrollWarp.toFixed(3));
   document.documentElement.style.setProperty('--scroll-warp-abs', Math.abs(smoothScrollWarp).toFixed(3));
 
-  // 2. 3D Per-Letter Magnetic & Chromatic Physics on RISHAV / KUMAR when hero is in view
+  // 2. Whole-Monument 3D Parallax Tilt + Smooth Magnetic Wave on RISHAV / KUMAR
   if (!canvasVisibility.heroKit || heroRevealCurrent < 0.15) return;
   const px = cursorState.tx;
   const py = cursorState.ty;
+
+  if (heroMonumentalNameEl) {
+    let targetRx = 0;
+    let targetRy = 0;
+    if (px > 0 && py > 0) {
+      const nx = (px / Math.max(window.innerWidth, 1) - 0.5) * 2;
+      const ny = (py / Math.max(window.innerHeight, 1) - 0.5) * 2;
+      targetRx = -ny * 5.5;
+      targetRy = nx * 6.5;
+    }
+    stageTiltRx += (targetRx - stageTiltRx) * 0.12;
+    stageTiltRy += (targetRy - stageTiltRy) * 0.12;
+    heroMonumentalNameEl.style.setProperty('--stage-rx', `${stageTiltRx.toFixed(2)}deg`);
+    heroMonumentalNameEl.style.setProperty('--stage-ry', `${stageTiltRy.toFixed(2)}deg`);
+  }
+
   heroCharStates.forEach((st) => {
     if (px > 0 && py > 0) {
       const r = st.el.getBoundingClientRect();
@@ -1263,43 +1289,30 @@ function renderKineticTypography() {
       const dx = px - cx;
       const dy = py - cy;
       const dist = Math.hypot(dx, dy);
-      const radius = 210;
+      const radius = 190;
       if (dist < radius) {
-        const inf = Math.pow(1 - dist / radius, 1.5);
-        st.tx = (-dx / radius) * 16 * inf;
-        st.ty = (-dy / radius) * 14 * inf;
-        st.tz = 44 * inf;
-        st.trx = (dy / radius) * -26 * inf;
-        st.try = (dx / radius) * 28 * inf;
+        const t = 1 - dist / radius;
+        const inf = t * t * (3 - 2 * t);
+        st.tx = (-dx / radius) * 5 * inf;
+        st.ty = -13 * inf;
         st.tglow = inf;
       } else {
         st.tx = 0;
         st.ty = 0;
-        st.tz = 0;
-        st.trx = 0;
-        st.try = 0;
         st.tglow = 0;
       }
     } else {
       st.tx = 0;
       st.ty = 0;
-      st.tz = 0;
-      st.trx = 0;
-      st.try = 0;
       st.tglow = 0;
     }
-    st.x += (st.tx - st.x) * 0.18;
-    st.y += (st.ty - st.y) * 0.18;
-    st.z += (st.tz - st.z) * 0.18;
-    st.rx += (st.trx - st.rx) * 0.18;
-    st.ry += (st.try - st.ry) * 0.18;
-    st.glow += (st.tglow - st.glow) * 0.2;
+    st.x += (st.tx - st.x) * 0.16;
+    st.y += (st.ty - st.y) * 0.16;
+    st.glow += (st.tglow - st.glow) * 0.16;
+    const charScale = 1 + st.glow * 0.065;
     st.el.style.setProperty('--char-x', `${st.x.toFixed(1)}px`);
     st.el.style.setProperty('--char-y', `${st.y.toFixed(1)}px`);
-    st.el.style.setProperty('--char-z', `${st.z.toFixed(1)}px`);
-    st.el.style.setProperty('--char-rx', `${st.rx.toFixed(1)}deg`);
-    st.el.style.setProperty('--char-ry', `${st.ry.toFixed(1)}deg`);
-    st.el.style.setProperty('--char-glow', st.glow.toFixed(3));
+    st.el.style.setProperty('--char-scale', charScale.toFixed(3));
   });
 }
 
@@ -1355,6 +1368,7 @@ function applyHeroKitProgress(progress) {
     monumentalText.style.opacity = Math.min(1, nameT * 1.35).toFixed(3);
     monumentalText.style.pointerEvents = 'none';
     monumentalText.style.transform = 'none';
+    monumentalText.style.filter = 'none';
 
     heroCharStates.forEach((st, idx) => {
       const charStart = 0.02 + (idx / totalChars) * 0.36;
@@ -1369,8 +1383,6 @@ function applyHeroKitProgress(progress) {
       const revRx = dirY * 82 * inv;
       const revRy = st.normOffset * -54 * inv;
       const revScale = 0.38 + ct * 0.62;
-      const revBlur = (inv * 11).toFixed(1);
-      const flash = ct > 0.55 && ct < 0.98 ? Math.sin(((ct - 0.55) / 0.43) * Math.PI) : 0;
 
       st.el.style.setProperty('--char-alpha', Math.min(1, ct * 1.4).toFixed(3));
       st.el.style.setProperty('--reveal-x', `${revX.toFixed(1)}px`);
@@ -1379,8 +1391,6 @@ function applyHeroKitProgress(progress) {
       st.el.style.setProperty('--reveal-rx', `${revRx.toFixed(1)}deg`);
       st.el.style.setProperty('--reveal-ry', `${revRy.toFixed(1)}deg`);
       st.el.style.setProperty('--reveal-scale', revScale.toFixed(3));
-      st.el.style.setProperty('--reveal-blur', `${revBlur}px`);
-      st.el.style.setProperty('--reveal-flash', flash.toFixed(3));
 
       if (ct > 0.08 && ct < 0.84) {
         const glyphIdx = Math.floor(p * 48 + idx * 7) % HERO_CIPHER_GLYPHS.length;
