@@ -202,7 +202,21 @@
         >
           <div id="hero-stage" class="hero-sticky-stage">
             <div class="hero-3d-arena">
+              <div class="hero-kit-canvas-wrap">
+                <canvas
+                  id="hero-kit-canvas"
+                  width="1040"
+                  height="560"
+                  aria-label="Interactive 2,200-particle 3D volumetric sculpture"
+                ></canvas>
+              </div>
+
               <div class="hero-monumental-backdrop" id="hero-monumental-text" data-parallax-depth="-0.25">
+                <div class="hero-kicker-pill" aria-label="Current status and location">
+                  <span class="telemetry-dot"></span>
+                  <span class="kicker-txt">CSE UNDERGRAD @ IIIT BHUBANESWAR // SHIMLA → BHUBANESWAR</span>
+                </div>
+
                 <div class="hero-name-stage-wrap">
                   <div id="hero-reveal-scanline" class="hero-reveal-scanline" aria-hidden="true"></div>
                   <h1 id="hero-name" class="hero-monumental-name" aria-label="Rishav Kumar">
@@ -214,45 +228,72 @@
                     </span>
                   </h1>
                 </div>
-              </div>
 
-              <div class="hero-kit-canvas-wrap">
-                <canvas
-                  id="hero-kit-canvas"
-                  width="1040"
-                  height="560"
-                  aria-label="Interactive 2,200-particle 3D volumetric sculpture"
-                ></canvas>
+                <p class="hero-lead-spec">
+                  <span class="hero-lead-highlight">C99/C++ Systems Builder</span>, Drummer &amp; Distance Runner.<br />
+                  Crafting low-level algorithms, procedural Web Audio instruments, and hardware telemetry bridges.
+                </p>
+
+                <div class="hero-actions-deck" role="group" aria-label="Primary portfolio actions">
+                  <a href="#projects" class="btn-primary hero-cta-btn" data-scroll-to="projects">
+                    <span>EXPLORE PROJECTS</span>
+                    <span class="hero-cta-arrow">↓</span>
+                  </a>
+                  <button
+                    id="hero-connect-btn"
+                    class="btn-secondary hero-groove-center-btn"
+                    type="button"
+                    aria-pressed="false"
+                  >
+                    <span id="hero-groove-label">🥁 128 BPM GROOVE</span>
+                  </button>
+                  <button
+                    type="button"
+                    id="hero-terminal-trigger"
+                    class="btn-secondary hero-term-btn"
+                    title="Open Command Shell"
+                  >
+                    <span>TERMINAL</span>
+                    <kbd>⌘K</kbd>
+                  </button>
+                  <a
+                    href="https://github.com/rishav-netizen"
+                    target="_blank"
+                    rel="noreferrer"
+                    class="btn-secondary hero-gh-btn"
+                  >
+                    <span>GITHUB ↗</span>
+                  </a>
+                </div>
+
+                <div class="hero-telemetry-strip" aria-hidden="true">
+                  <div class="hero-telemetry-item">
+                    <span class="ht-label">LOCATION</span>
+                    <span class="ht-val">SHIMLA → BHUBANESWAR</span>
+                  </div>
+                  <div class="hero-telemetry-item">
+                    <span class="ht-label">CADENCE</span>
+                    <span class="ht-val">176 SPM</span>
+                  </div>
+                  <div class="hero-telemetry-item">
+                    <span class="ht-label">MASTER CLOCK</span>
+                    <span class="ht-val">128 BPM</span>
+                  </div>
+                  <div class="hero-telemetry-item">
+                    <span class="ht-label">RHYTHM</span>
+                    <span class="ht-val">7/8 POLYRHYTHM</span>
+                  </div>
+                </div>
+
+                <div class="hero-micro-controls" style="display:none;" aria-hidden="true">
+                  <button id="hero-morph-btn" type="button">◈ STAGE ↻</button>
+                  <button id="warp-trigger" type="button">🎮 ARCADE <span>⚡ WARP / TAKEOFF</span></button>
+                </div>
               </div>
             </div>
 
-            <div class="hero-minimal-footer" data-parallax-depth="0.1">
-              <div class="cta-row cta-row--centerpiece" role="group" aria-label="Interactive hero stage controls">
-                <button
-                  id="hero-morph-btn"
-                  class="btn-secondary cta-side-btn"
-                  type="button"
-                  title="Cycle 3D particle sculpture"
-                >
-                  ◈ STAGE ↻
-                </button>
-                <button
-                  id="hero-connect-btn"
-                  class="btn-primary hero-groove-center-btn"
-                  type="button"
-                  aria-pressed="false"
-                >
-                  <span id="hero-groove-label">🥁 GROOVE</span>
-                </button>
-                <button
-                  id="warp-trigger"
-                  class="btn-secondary warp-trigger cta-side-btn"
-                  type="button"
-                  aria-describedby="warp-hint"
-                >
-                  🎮 ARCADE <span class="sr-only">⚡ WARP / TAKEOFF</span>
-                </button>
-              </div>
+            <!-- Legacy footer container retained for scroll cue & backward compatibility -->
+            <div class="hero-minimal-footer" data-parallax-depth="0.1" style="display:none;" aria-hidden="true">
               <span id="warp-hint" class="sr-only">Launch arcade</span>
             </div>
           </div>
