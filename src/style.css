@@ -1205,13 +1205,128 @@ h2 em,
       calc(var(--char-y, 0px) + var(--reveal-y, 0px)),
       var(--reveal-z, 0px)
     )
-    rotateX(var(--reveal-rx, 0deg))
-    rotateY(var(--reveal-ry, 0deg))
+    rotateX(calc(var(--char-rx, 0deg) + var(--reveal-rx, 0deg)))
+    rotateY(calc(var(--char-ry, 0deg) + var(--reveal-ry, 0deg)))
     scale(calc(var(--reveal-scale, 1) * var(--char-scale, 1)));
+}
+
+/* 3D Holographic Wireframe Echo Behind/Around Each Letter */
+.hero-char::before {
+  content: attr(data-char);
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 1.5px var(--accent);
+  text-shadow: none;
+  opacity: var(--echo-alpha, 0.28);
+  transform: translate3d(var(--echo-x, 0px), var(--echo-y, -4px), 0);
+}
+
+.hero-word--second .hero-char::before {
+  -webkit-text-stroke: 1.5px var(--matrix-violet);
+}
+
+/* Specular Liquid-Metal & Prismatic Light Sweep Clipped Strictly Inside Letter Faces */
+.hero-char::after {
+  content: attr(data-char);
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  text-shadow: none;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  background-size: 260% 100%, 100% 100%;
+  animation: heroSpecularSweep 5.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  animation-delay: calc(var(--char-idx, 0) * 110ms);
+}
+
+.hero-word--first .hero-char::after {
+  background-image:
+    linear-gradient(
+      112deg,
+      transparent 28%,
+      rgba(125, 211, 252, 0.92) 45%,
+      #ffffff 50%,
+      rgba(192, 132, 252, 0.88) 55%,
+      transparent 72%
+    ),
+    linear-gradient(
+      180deg,
+      #ffffff 0%,
+      #f8fafc 46%,
+      #bae6fd 78%,
+      #94a3b8 100%
+    );
+}
+
+.hero-word--second .hero-char::after {
+  background-image:
+    linear-gradient(
+      112deg,
+      transparent 28%,
+      rgba(255, 255, 255, 0.96) 46%,
+      #ffffff 50%,
+      rgba(192, 132, 252, 0.9) 55%,
+      transparent 72%
+    ),
+    linear-gradient(
+      180deg,
+      #ffffff 0%,
+      var(--accent) 34%,
+      var(--accent) 70%,
+      var(--matrix-violet) 100%
+    );
+}
+
+[data-theme='light'] .hero-word--first .hero-char::after {
+  background-image:
+    linear-gradient(
+      112deg,
+      transparent 30%,
+      rgba(0, 174, 187, 0.75) 47%,
+      #ffffff 50%,
+      rgba(0, 150, 164, 0.75) 53%,
+      transparent 70%
+    ),
+    linear-gradient(180deg, #031211 0%, #1c2e2d 65%, #007682 100%);
+}
+
+[data-theme='light'] .hero-word--second .hero-char::after {
+  background-image:
+    linear-gradient(
+      112deg,
+      transparent 30%,
+      rgba(255, 255, 255, 0.85) 48%,
+      #ffffff 50%,
+      transparent 70%
+    ),
+    linear-gradient(180deg, #00b8c8 0%, #0096a4 55%, #031211 100%);
+}
+
+@keyframes heroSpecularSweep {
+  0%,
+  18% {
+    background-position: 145% 0, 0 0;
+  }
+  62%,
+  100% {
+    background-position: -65% 0, 0 0;
+  }
 }
 
 .hero-char.is-decoding {
   color: #ffffff !important;
+}
+
+.hero-char.is-decoding::before,
+.hero-char.is-decoding::after {
+  opacity: 0 !important;
 }
 
 .hero-kit-canvas-wrap {

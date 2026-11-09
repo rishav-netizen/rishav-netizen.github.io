@@ -119,12 +119,15 @@ const marioRunner = new MarioRunnerTrack($('#runner-track-canvas'), {
 });
 const elevationTrace = new ElevationPaceTrace($('#runner-elevation-canvas'));
 
+let heroTextBeatPulse = 0;
+
 function triggerDrum(type, { count = true, strength: strengthOverride } = {}) {
   setSoundEnabled(true);
   audio.unlock();
   audio.hit(type);
   if (count) setBeatCount();
   const strength = strengthOverride ?? (type === 'kick' ? 1.4 : type === 'rim' ? 1.1 : 0.75);
+  heroTextBeatPulse = Math.min(1.5, heroTextBeatPulse + strength * 0.55);
   background.shockwave(strength);
   heroKitStage?.triggerHit(type, strength);
   matrix.triggerShockwave(type === 'kick' ? 0.22 : type === 'rim' ? 0.55 : 0.8, strength);
@@ -225,6 +228,10 @@ function updateSequencerGrid(sequencer) {
     const isSoloed = Boolean(sequencer.trackSolo[track]);
     btn.classList.toggle('is-active', isSoloed);
     btn.setAttribute('aria-pressed', String(isSoloed));
+  });
+
+  $$('[data-preset]').forEach((btn) => {
+    btn.classList.toggle('active', btn.dataset.preset === sequencer.currentPreset);
   });
 }
 
@@ -383,6 +390,7 @@ const sequencer = new Sequencer(audio, {
     if (step < 0) return;
     if (tracks.length) setBeatCount();
     if (tracks.includes('kick')) {
+      heroTextBeatPulse = Math.min(1.5, heroTextBeatPulse + 0.65);
       background.shockwave(1.1);
       heroKitStage?.triggerHit('kick', 1.1);
       matrix.triggerShockwave(0.22, 1.25);
@@ -873,7 +881,15 @@ $$('.amp-notch, .vol-notch, [data-preset], [data-hit], [data-solo]').forEach((bt
 
 $('#loop-toggle')?.addEventListener('click', toggleSequencer);
 $('#player-play-btn')?.addEventListener('click', toggleSequencer);
-$('#groove-btn')?.addEventListener('click', toggleSequencer);
+$('#groove-btn')?.addEventListener('click', () => {
+  if (!sequencer.isPlaying) {
+    sequencer.setPreset('pocket');
+    updateSequencerGrid(sequencer);
+    matrix.setPattern(sequencer.getPattern());
+    updateBpm(sequencer.bpm);
+  }
+  toggleSequencer();
+});
 
 $$('[data-preset]').forEach((btn) => {
   btn.addEventListener('click', () => {
@@ -1252,7 +1268,7 @@ let stageTiltRx = 0;
 let stageTiltRy = 0;
 const heroMonumentalNameEl = $('#hero-name');
 
-function renderKineticTypography() {
+function renderKineticTypography(nowMs = performance.now()) {
   // 1. Scroll-velocity chromatic warp on section headings
   const rawVelocity = lenis ? scrollState.velocity : 0;
   const targetWarp = Math.min(Math.max(rawVelocity / 42, -1), 1);
@@ -1261,10 +1277,12 @@ function renderKineticTypography() {
   document.documentElement.style.setProperty('--scroll-warp', smoothScrollWarp.toFixed(3));
   document.documentElement.style.setProperty('--scroll-warp-abs', Math.abs(smoothScrollWarp).toFixed(3));
 
-  // 2. Whole-Monument 3D Parallax Tilt + Smooth Magnetic Wave on RISHAV / KUMAR
+  // 2. Whole-Monument 3D Parallax Tilt + Zero-Gravity Wave + Holographic Echo on RISHAV / KUMAR
   if (!canvasVisibility.heroKit || heroRevealCurrent < 0.15) return;
   const px = cursorState.tx;
   const py = cursorState.ty;
+  heroTextBeatPulse *= 0.88;
+  if (heroTextBeatPulse < 0.005) heroTextBeatPulse = 0;
 
   if (heroMonumentalNameEl) {
     let targetRx = 0;
@@ -1281,7 +1299,12 @@ function renderKineticTypography() {
     heroMonumentalNameEl.style.setProperty('--stage-ry', `${stageTiltRy.toFixed(2)}deg`);
   }
 
-  heroCharStates.forEach((st) => {
+  const wavePhase = nowMs * 0.0026;
+  heroCharStates.forEach((st, idx) => {
+    const idleWave = Math.sin(wavePhase - idx * 0.55);
+    const idleY = idleWave * 3.2;
+    const idleRx = Math.cos(wavePhase - idx * 0.55) * 4.5;
+
     if (px > 0 && py > 0) {
       const r = st.el.getBoundingClientRect();
       const cx = r.left + r.width * 0.5;
@@ -1289,30 +1312,52 @@ function renderKineticTypography() {
       const dx = px - cx;
       const dy = py - cy;
       const dist = Math.hypot(dx, dy);
-      const radius = 190;
+      const radius = 210;
       if (dist < radius) {
         const t = 1 - dist / radius;
         const inf = t * t * (3 - 2 * t);
-        st.tx = (-dx / radius) * 5 * inf;
-        st.ty = -13 * inf;
+        st.tx = (-dx / radius) * 7 * inf;
+        st.ty = -14 * inf;
+        st.trx = (dy / radius) * 14 * inf;
+        st.try = (-dx / radius) * 14 * inf;
         st.tglow = inf;
       } else {
         st.tx = 0;
         st.ty = 0;
+        st.trx = 0;
+        st.try = 0;
         st.tglow = 0;
       }
     } else {
       st.tx = 0;
       st.ty = 0;
+      st.trx = 0;
+      st.try = 0;
       st.tglow = 0;
     }
     st.x += (st.tx - st.x) * 0.16;
     st.y += (st.ty - st.y) * 0.16;
+    st.rx += (st.trx - st.rx) * 0.16;
+    st.ry += (st.try - st.ry) * 0.16;
     st.glow += (st.tglow - st.glow) * 0.16;
-    const charScale = 1 + st.glow * 0.065;
+
+    const beatKick = heroTextBeatPulse * (st.lineIdx === 0 ? -4.5 : 4.5);
+    const totalY = st.y + idleY + beatKick;
+    const totalRx = st.rx + idleRx;
+    const charScale = 1 + st.glow * 0.075 + heroTextBeatPulse * 0.035;
+
+    const echoX = -st.x * 0.85 + Math.sin(wavePhase + idx * 0.4) * 2.2;
+    const echoY = -4.5 - st.glow * 6.5 - heroTextBeatPulse * 5;
+    const echoAlpha = Math.min(0.88, 0.26 + st.glow * 0.52 + heroTextBeatPulse * 0.35);
+
     st.el.style.setProperty('--char-x', `${st.x.toFixed(1)}px`);
-    st.el.style.setProperty('--char-y', `${st.y.toFixed(1)}px`);
+    st.el.style.setProperty('--char-y', `${totalY.toFixed(1)}px`);
+    st.el.style.setProperty('--char-rx', `${totalRx.toFixed(1)}deg`);
+    st.el.style.setProperty('--char-ry', `${st.ry.toFixed(1)}deg`);
     st.el.style.setProperty('--char-scale', charScale.toFixed(3));
+    st.el.style.setProperty('--echo-x', `${echoX.toFixed(1)}px`);
+    st.el.style.setProperty('--echo-y', `${echoY.toFixed(1)}px`);
+    st.el.style.setProperty('--echo-alpha', echoAlpha.toFixed(2));
   });
 }
 
@@ -2064,7 +2109,7 @@ gsap.ticker.add((time) => {
       if (canvasVisibility.venomHero || canvasVisibility.venomContact || venomSymbiote.droplets?.length) {
         venomSymbiote.render(milliseconds);
       }
-      renderKineticTypography();
+      renderKineticTypography(milliseconds);
     }
     renderCursorHalo();
     staticFrameDrawn = false;

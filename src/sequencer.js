@@ -11,6 +11,8 @@ export class Sequencer {
     // Pocket swing factor (delays odd 16th notes slightly for a human head-nodding groove)
     this.swing = 0.17;
     // Default pattern: Syncopated Neo-Soul / Funk Pocket (with ghost snares & open hi-hat)
+    this.currentPreset = 'pocket';
+    this.melodyEnabled = true;
     this.pattern = {
       kick: [1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0],
       rim:  [0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1],
@@ -57,6 +59,8 @@ export class Sequencer {
   }
 
   setPreset(name) {
+    this.currentPreset = name;
+    this.melodyEnabled = name === 'pocket' || name === 'groovy';
     if (name === 'pocket' || name === 'groovy') {
       // Laid-back 98 BPM Neo-Soul / Funk Pocket with ghost notes & syncopated kick
       this.pattern = {
@@ -159,6 +163,8 @@ export class Sequencer {
 
   setStep(track, step, enabled = !this.pattern[track][step]) {
     if (!TRACKS.includes(track) || step < 0 || step >= STEP_COUNT) return;
+    this.currentPreset = 'custom';
+    this.melodyEnabled = false;
     this.pattern[track][step] = enabled ? 1 : 0;
     return this.pattern[track][step];
   }
@@ -233,7 +239,7 @@ export class Sequencer {
           this.audio.schedule('hat', swungTime, isOpenHat ? 0.58 : hatAccent, { open: isOpenHat });
         }
       });
-      if (!anySolo) {
+      if (!anySolo && this.melodyEnabled) {
         this.audio.scheduleGrooveAccompaniment?.(currentStep, swungTime);
       }
       const delay = Math.max(0, (swungTime - ctx.currentTime) * 1000);
@@ -256,7 +262,7 @@ export class Sequencer {
           this.audio?.schedule('hat', 0, isOpenHat ? 0.58 : hatAccent, { open: isOpenHat });
         }
       });
-      if (!anySolo) {
+      if (!anySolo && this.melodyEnabled) {
         this.audio?.scheduleGrooveAccompaniment?.(currentStep, 0);
       }
       if (this.playing) this.onStep?.(currentStep, activeTracks);
