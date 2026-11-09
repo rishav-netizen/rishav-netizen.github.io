@@ -1197,7 +1197,6 @@ const heroFooterEl = $('.hero-minimal-footer');
 const heroConnectBtn = $('#hero-connect-btn');
 const floatingDockEl = $('.floating-dock');
 const heroScrollCueEl = $('#hero-scroll-cue');
-const HERO_CIPHER_GLYPHS = 'ΩΨΦΔΛΘΞΠΣ017689#%&*';
 
 // Interactive 3D Per-Letter Magnetic & Scroll-Reveal Physics on #hero-name ("RISHAV" / "KUMAR")
 const heroCharStates = [];
@@ -1359,7 +1358,7 @@ function applyHeroKitProgress(progress) {
   const currentScrollY = lenis ? scrollState.scroll : window.scrollY;
   updateHeroScrollCue(p, currentScrollY);
 
-  // Stage 1 (p: 0.02 -> 0.68): Staggered 3D Per-Character Kinetic Assembly + Cipher Decode + Laser Scanline
+  // Stage 1 (p: 0.02 -> 0.68): Staggered Optical Kinetic Typography Reveal
   const nameT = smoothstep(0.01, 0.68, p);
   const totalChars = Math.max(heroCharStates.length, 1);
 
@@ -1377,39 +1376,29 @@ function applyHeroKitProgress(progress) {
       const inv = 1 - ct;
 
       const dirY = st.lineIdx === 0 ? -1 : 1;
-      const revX = st.normOffset * 115 * inv;
-      const revY = dirY * 72 * inv;
-      const revZ = -280 * inv;
-      const revRx = dirY * 82 * inv;
-      const revRy = st.normOffset * -54 * inv;
-      const revScale = 0.38 + ct * 0.62;
+      const revX = st.normOffset * 10 * inv;
+      const revY = dirY * 18 * inv;
+      const revZ = -30 * inv;
+      const revRx = dirY * 6 * inv;
+      const revRy = 0;
+      const revScale = 0.94 + ct * 0.06;
+      const revBlur = inv * 12;
 
-      st.el.style.setProperty('--char-alpha', Math.min(1, ct * 1.4).toFixed(3));
+      st.el.style.setProperty('--char-alpha', Math.min(1, ct * 1.5).toFixed(3));
       st.el.style.setProperty('--reveal-x', `${revX.toFixed(1)}px`);
       st.el.style.setProperty('--reveal-y', `${revY.toFixed(1)}px`);
       st.el.style.setProperty('--reveal-z', `${revZ.toFixed(1)}px`);
       st.el.style.setProperty('--reveal-rx', `${revRx.toFixed(1)}deg`);
       st.el.style.setProperty('--reveal-ry', `${revRy.toFixed(1)}deg`);
       st.el.style.setProperty('--reveal-scale', revScale.toFixed(3));
+      st.el.style.setProperty('--reveal-blur', `${revBlur.toFixed(1)}px`);
 
-      if (ct > 0.08 && ct < 0.84) {
-        const glyphIdx = Math.floor(p * 48 + idx * 7) % HERO_CIPHER_GLYPHS.length;
-        const nextGlyph = HERO_CIPHER_GLYPHS[glyphIdx];
-        if (st.el.textContent !== nextGlyph) st.el.textContent = nextGlyph;
-        st.el.classList.add('is-decoding');
-      } else {
-        if (st.el.textContent !== st.targetChar) st.el.textContent = st.targetChar;
-        st.el.classList.remove('is-decoding');
-      }
+      if (st.el.textContent !== st.targetChar) st.el.textContent = st.targetChar;
+      st.el.classList.remove('is-decoding');
     });
 
     if (heroScanlineEl) {
-      const scanActive = p > 0.03 && p < 0.68;
-      const scanPos = smoothstep(0.03, 0.66, p) * 104;
-      const scanAlpha = scanActive ? Math.sin(smoothstep(0.03, 0.66, p) * Math.PI) : 0;
-      heroScanlineEl.style.top = `${scanPos.toFixed(1)}%`;
-      heroScanlineEl.style.opacity = scanAlpha.toFixed(3);
-      heroScanlineEl.style.transform = `scaleX(${(0.35 + scanAlpha * 0.65).toFixed(3)})`;
+      heroScanlineEl.style.opacity = '0';
     }
 
     if (p >= 0.64 && !heroLockShockwaveFired) {
@@ -1739,7 +1728,6 @@ function revealStage() {
 // ---------------------------------------------------------------------------
 // Cinematic Name-Reveal Preloader
 // ---------------------------------------------------------------------------
-const SCRAMBLE_GLYPHS = 'ΩΨΦΔΛΘΞΠΣΥabcdefghijklmnopqrstuvwxyz0123456789#@!?%&';
 const NAME_FIRST = 'RISHAV';
 const NAME_LAST  = 'KUMAR';
 
@@ -1758,28 +1746,19 @@ function buildNameRow(containerId, word) {
   });
 }
 
-/** Scramble-then-resolve a single character span */
-function scrambleChar(span, targetLetter, duration, onDone) {
-  const startTime = performance.now();
+/** Optical focus-resolve a single character span */
+function resolveCharFocus(span, duration, onDone) {
   span.classList.add('is-scrambling');
-  let raf;
-  function tick(now) {
-    const elapsed = now - startTime;
-    const t = Math.min(elapsed / duration, 1);
-    if (t < 0.85) {
-      // Random glyph phase
-      span.textContent = SCRAMBLE_GLYPHS[Math.floor(Math.random() * SCRAMBLE_GLYPHS.length)];
-      raf = requestAnimationFrame(tick);
-    } else {
-      // Snap to real letter
-      span.textContent = targetLetter;
+  gsap.to(span, {
+    filter: 'blur(0px)',
+    duration: duration / 1000,
+    ease: 'power2.out',
+    onComplete: () => {
       span.classList.remove('is-scrambling');
       span.classList.add('is-solved');
       onDone?.();
-    }
-  }
-  raf = requestAnimationFrame(tick);
-  return () => cancelAnimationFrame(raf);
+    },
+  });
 }
 
 async function runSoundcheck() {
@@ -1815,17 +1794,18 @@ async function runSoundcheck() {
 
   const separator = $('.sc-name-separator');
 
-  // Phase 1: Fade in chars (staggered, still showing scrambled glyphs)
+  // Phase 1: Fade in chars (staggered with gentle upward drift)
   const STAGGER_MS   = 52;   // gap between each letter appearing
-  const SCRAMBLE_MS  = 340;  // how long each char scrambles before resolving
+  const FOCUS_MS     = 320;  // how long each char unblurs into crisp focus
   const HOLD_MS      = 320;  // pause after all chars resolve before exit
 
-  // Fade each char in (opacity + y) before scrambling
+  // Fade each char in (opacity + y + scale)
   allChars.forEach(({ span }, i) => {
     gsap.to(span, {
       opacity: 1,
       y: 0,
-      duration: 0.28,
+      scale: 1,
+      duration: 0.36,
       delay: i * (STAGGER_MS / 1000),
       ease: 'power2.out',
     });
@@ -1833,8 +1813,8 @@ async function runSoundcheck() {
 
   // Progress bar counter runs in parallel
   const totalFadeIn  = allChars.length * STAGGER_MS;
-  const totalScramble = SCRAMBLE_MS;
-  const totalDiag    = totalFadeIn + totalScramble;
+  const totalFocus   = FOCUS_MS;
+  const totalDiag    = totalFadeIn + totalFocus;
 
   const progress = { value: 0 };
   gsap.to(progress, {
@@ -1851,7 +1831,7 @@ async function runSoundcheck() {
       if (statusEl) {
         statusEl.textContent =
           v < 30  ? '> CALIBRATING 2,200-NODE POINT CLOUD'
-          : v < 60 ? '> ASSEMBLING NAME HOLOGRAM'
+          : v < 60 ? '> FOCUSING NAME OPTICS'
           : v < 85 ? '> LOCKING 3D DEPTH FIELD'
           :          '> OPENING STAGE';
       }
@@ -1862,17 +1842,17 @@ async function runSoundcheck() {
     },
   });
 
-  // Phase 2: After all chars are visible, start scramble-resolve cascade
-  await new Promise((resolve) => window.setTimeout(resolve, totalFadeIn + 60));
+  // Phase 2: After chars fade in, ripple focus unblur cascade from left to right
+  await new Promise((resolve) => window.setTimeout(resolve, totalFadeIn + 40));
 
   let resolvedCount = 0;
   const totalChars = allChars.length;
 
   await new Promise((resolveAll) => {
-    allChars.forEach(({ span, target }, i) => {
-      const delay = i * 38; // slight cascade from left to right
+    allChars.forEach(({ span }, i) => {
+      const delay = i * 36;
       window.setTimeout(() => {
-        scrambleChar(span, target, SCRAMBLE_MS, () => {
+        resolveCharFocus(span, FOCUS_MS, () => {
           resolvedCount += 1;
           if (resolvedCount === totalChars) resolveAll(undefined);
         });
