@@ -1123,8 +1123,8 @@ h2 em,
   align-items: center;
   justify-content: center;
   gap: clamp(2px, 0.5vh, 6px);
-  font-family: 'Syne', 'Space Grotesk', sans-serif;
-  font-weight: 800;
+  font-family: 'Archivo Black', 'Montserrat', 'Space Grotesk', sans-serif;
+  font-weight: 900;
   text-transform: uppercase;
   overflow: visible;
   transform: perspective(1100px)
@@ -1146,47 +1146,59 @@ h2 em,
 .hero-word {
   display: inline-flex;
   white-space: nowrap;
-  font-family: 'Syne', 'Space Grotesk', sans-serif;
-  font-weight: 800;
-  letter-spacing: -0.015em;
-  line-height: 0.92;
+  font-family: 'Archivo Black', 'Montserrat', 'Space Grotesk', sans-serif;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 0.88;
   overflow: visible;
 }
 
-/* Line 1: RISHAV — Monumental Syne with subtle starlight ambient glow */
+/* Line 1: RISHAV — Sculpted 3D Monumental Block Extrusion */
 .hero-word--first {
-  font-size: clamp(56px, 11.5vw, 168px);
+  font-size: clamp(58px, 11.8vw, 174px);
   color: var(--text-bright);
   text-shadow:
-    0 2px 24px rgba(255, 255, 255, 0.16),
-    0 8px 36px rgba(0, 0, 0, 0.65);
+    0 1px 0 #cbd5e1,
+    0 2px 0 #94a3b8,
+    0 3px 0 #64748b,
+    0 4px 0 #334155,
+    0 5px 0 #1e293b,
+    0 6px 0 #090d16;
 }
 
-/* Line 2: KUMAR — Sculpted electric cyan / accent glow */
+/* Line 2: KUMAR — Sculpted 3D Accent Monument Extrusion */
 .hero-word--second {
-  font-size: clamp(62px, 12.8vw, 184px);
+  font-size: clamp(64px, 13vw, 190px);
   color: var(--accent);
   text-shadow:
-    0 0 28px var(--accent-glow),
-    0 10px 38px rgba(0, 0, 0, 0.7);
+    0 1px 0 rgba(255, 255, 255, 0.25),
+    0 2px 0 rgba(15, 23, 42, 0.65),
+    0 3px 0 rgba(15, 23, 42, 0.78),
+    0 4px 0 rgba(9, 13, 22, 0.88),
+    0 5px 0 rgba(4, 6, 12, 0.95),
+    0 6px 0 #02040a;
 }
 
 [data-theme='light'] .hero-word--first {
   text-shadow:
-    0 2px 14px rgba(15, 23, 42, 0.12);
+    0 1px 0 #d1ccc0,
+    0 2px 0 #b8b2a4,
+    0 3px 0 #9e9889,
+    0 4px 0 rgba(3, 18, 17, 0.22);
 }
 
 [data-theme='light'] .hero-word--second {
   text-shadow:
-    0 2px 16px rgba(0, 180, 160, 0.25);
+    0 1px 0 #007682,
+    0 2px 0 #005b65,
+    0 3px 0 #00424a,
+    0 4px 0 rgba(3, 18, 17, 0.25);
 }
 
 .hero-char {
   position: relative;
   display: inline-block;
   opacity: var(--char-alpha, 1);
-  filter: blur(var(--reveal-blur, 0px));
-  will-change: transform, opacity, filter;
   transform: perspective(900px)
     translate3d(
       calc(var(--char-x, 0px) + var(--reveal-x, 0px)),
@@ -3926,45 +3938,35 @@ html[data-soundcheck='complete'] .soundcheck-preloader {
 
 .sc-char {
   display: inline-block;
-  font-family: 'Syne', 'Space Grotesk', sans-serif;
-  font-weight: 800;
-  font-size: clamp(48px, 10vw, 150px);
-  letter-spacing: -0.015em;
+  font-family: 'Archivo Black', 'Montserrat', 'Space Grotesk', sans-serif;
+  font-weight: 900;
+  font-size: clamp(48px, 10.2vw, 154px);
+  letter-spacing: -0.02em;
   color: var(--text-bright);
   opacity: 0;
-  filter: blur(14px);
-  transform: translateY(18px) scale(0.96);
-  will-change: transform, opacity, filter, color, text-shadow;
-  transition: color 180ms ease, text-shadow 180ms ease, filter 220ms ease;
+  transform: translateY(12px);
+  will-change: transform, opacity, color, text-shadow;
+  transition: color 120ms ease, text-shadow 120ms ease;
 }
 
 #sc-name-last .sc-char {
   color: var(--accent);
 }
 
-/* "solved" state — clean luminous bloom */
+/* "solved" state — the glyph has snapped to the real letter */
 .sc-char.is-solved {
   color: #f8fafc;
-  filter: blur(0px);
   text-shadow:
     0 0 28px rgba(125, 211, 252, 0.55),
     0 0 60px rgba(125, 211, 252, 0.22);
 }
 
-#sc-name-last .sc-char.is-solved {
-  color: var(--accent);
-  filter: blur(0px);
-  text-shadow:
-    0 0 32px var(--accent-glow, rgba(0, 245, 212, 0.5)),
-    0 0 70px var(--accent-glow, rgba(0, 245, 212, 0.2));
-}
-
-/* focus transition state */
+/* scrambling state — glitchy accent colour */
 .sc-char.is-scrambling {
   color: #7dd3fc;
-  filter: blur(6px);
   text-shadow:
-    0 0 20px rgba(125, 211, 252, 0.7);
+    0 0 18px rgba(125, 211, 252, 0.8),
+    0 0 38px rgba(192, 132, 252, 0.4);
 }
 
 .sc-name-separator {
