@@ -102,7 +102,7 @@ export class Sequencer {
         rim:  [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
         hat:  [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0],
       };
-      this.swing = 0.05;
+      this.swing = 0;
       this.setBpm(112);
     } else if (name === 'funk' || name === 'breakbeat') {
       this.pattern = {
@@ -118,6 +118,7 @@ export class Sequencer {
         rim:  Array(STEP_COUNT).fill(0),
         hat:  Array(STEP_COUNT).fill(0),
       };
+      this.swing = 0;
     }
     return this.pattern;
   }
@@ -165,6 +166,7 @@ export class Sequencer {
     if (!TRACKS.includes(track) || step < 0 || step >= STEP_COUNT) return;
     this.currentPreset = 'custom';
     this.melodyEnabled = false;
+    this.swing = 0;
     this.pattern[track][step] = enabled ? 1 : 0;
     return this.pattern[track][step];
   }
@@ -218,25 +220,36 @@ export class Sequencer {
       return true;
     });
 
-    // Apply human pocket swing to odd 16th-note subdivisions
-    const swingDelay = currentStep % 2 === 1 ? this.stepDuration * (this.swing || 0.15) : 0;
+    const isPocket = this.currentPreset === 'pocket' || this.currentPreset === 'groovy';
+
+    // Micro-timing swing only for presets that explicitly configure it (0 for user-edited / custom beats)
+    const effectiveSwing = isPocket ? 0.18 : (this.currentPreset === 'custom' ? 0 : (typeof this.swing === 'number' ? this.swing : 0));
+    const swingDelay = currentStep % 2 === 1 ? this.stepDuration * effectiveSwing : 0;
     const swungTime = time > 0 ? time + swingDelay : 0;
 
-    // Ghost-note snare on off-beat steps (anything other than backbeats 4 and 12)
+    // Humanized dynamics (ghost snares, open-hat turnaround, velocity curves)
+    // apply ONLY to the curated background 'pocket' groove.
+    // For user-made custom beats and standard presets, play true, punchy, unwarped hits!
     const isBackbeatSnare = currentStep === 4 || currentStep === 12;
-    // Open hi-hat bark on step 14 (just before the bar loops)
-    const isOpenHat = currentStep === 14;
-    const hatAccent = currentStep % 4 === 0 ? 0.56 : currentStep % 2 === 0 ? 0.42 : 0.28;
+    const ghostSnare = isPocket && !isBackbeatSnare;
+    const isOpenHat = isPocket && currentStep === 14;
+    const hatLevel = isPocket
+      ? (currentStep % 4 === 0 ? 0.56 : currentStep % 2 === 0 ? 0.42 : 0.28)
+      : 0.5;
+    const kickLevel = isPocket
+      ? (currentStep === 0 ? 1.0 : 0.88)
+      : 0.95;
+    const rimLevel = isPocket ? 0.9 : 0.85;
 
     const ctx = this.audio?.context;
     if (swungTime > 0 && ctx && ctx.state === 'running') {
       activeTracks.forEach((track) => {
         if (track === 'kick') {
-          this.audio.schedule('kick', swungTime, currentStep === 0 ? 1.0 : 0.88);
+          this.audio.schedule('kick', swungTime, kickLevel);
         } else if (track === 'rim') {
-          this.audio.schedule('rim', swungTime, 0.9, { ghost: !isBackbeatSnare });
+          this.audio.schedule('rim', swungTime, rimLevel, { ghost: ghostSnare });
         } else if (track === 'hat') {
-          this.audio.schedule('hat', swungTime, isOpenHat ? 0.58 : hatAccent, { open: isOpenHat });
+          this.audio.schedule('hat', swungTime, isOpenHat ? 0.58 : hatLevel, { open: isOpenHat });
         }
       });
       if (!anySolo && this.melodyEnabled) {
@@ -255,11 +268,11 @@ export class Sequencer {
     } else {
       activeTracks.forEach((track) => {
         if (track === 'kick') {
-          this.audio?.schedule('kick', 0, currentStep === 0 ? 1.0 : 0.88);
+          this.audio?.schedule('kick', 0, kickLevel);
         } else if (track === 'rim') {
-          this.audio?.schedule('rim', 0, 0.9, { ghost: !isBackbeatSnare });
+          this.audio?.schedule('rim', 0, rimLevel, { ghost: ghostSnare });
         } else if (track === 'hat') {
-          this.audio?.schedule('hat', 0, isOpenHat ? 0.58 : hatAccent, { open: isOpenHat });
+          this.audio?.schedule('hat', 0, isOpenHat ? 0.58 : hatLevel, { open: isOpenHat });
         }
       });
       if (!anySolo && this.melodyEnabled) {
